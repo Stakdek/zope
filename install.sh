@@ -12,6 +12,9 @@ sudo apt-get install python3.5-dev -y
 sudo apt-get install python3.5 -y
 sudo apt-get install python3.5-venv -y
 bin/pip install wheel
+# tar -xzvf Zope.tar.gz
+tar -xzvf custom-products.tar.gz
+
 if [[ ! -d Zope ]]; then
     echo "Clone Zope4"
     git clone https://github.com/zopefoundation/Zope.git
