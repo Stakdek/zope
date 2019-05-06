@@ -1,0 +1,59 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta">
+
+  <meta:directives namespace="http://namespaces.zope.org/genericsetup">
+
+    <meta:directive
+        name="registerProfile"
+        schema=".zcml.IRegisterProfileDirective"
+        handler=".zcml.registerProfile"
+        />
+
+    <meta:directive
+        name="exportStep"
+        schema=".zcml.IExportStepDirective"
+        handler=".zcml.exportStep"
+        />
+
+    <meta:complexDirective
+        name="importStep"
+        schema=".zcml.IImportStepDirective"
+        handler=".zcml.importStep"
+        >
+      <meta:subdirective
+          name="depends"
+          schema=".zcml.IImportStepDependsDirective"
+          />
+    </meta:complexDirective>
+
+    <meta:directive
+        name="upgradeStep"
+        schema=".zcml.IUpgradeStepDirective"
+        handler=".zcml.upgradeStep"
+        />
+
+    <meta:directive
+       name="upgradeDepends"
+       schema=".zcml.IUpgradeDependsDirective"
+       handler=".zcml.upgradeDepends"
+       />
+
+    <meta:complexDirective
+        name="upgradeSteps"
+        schema=".zcml.IUpgradeStepsDirective"
+        handler=".zcml.upgradeSteps"
+        >
+      <meta:subdirective
+         name="upgradeStep"
+         schema=".zcml.IUpgradeStepsStepSubDirective"
+         />
+      <meta:subdirective
+         name="upgradeDepends"
+         schema=".zcml.IUpgradeDependsSubDirective"
+         />
+    </meta:complexDirective>
+
+  </meta:directives>
+
+</configure>

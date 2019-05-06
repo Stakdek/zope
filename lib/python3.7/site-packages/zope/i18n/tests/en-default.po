@@ -1,0 +1,45 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Zope 3\n"
+"PO-Revision-Date: 2002/06/13\n"
+"Last-Translator: Zope 3 contributors\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+msgid "short_greeting"
+msgstr "Hello!"
+
+msgid "greeting"
+msgstr "Hello $name, how are you?"
+
+msgid "There is one file."
+msgid_plural "There are %d files."
+msgstr[0] "There is one file."
+msgstr[1] "There are %d files."
+
+msgid "The item is rated 1/5 star."
+msgid_plural "The item is rated %s/5 stars."
+msgstr[0] "The item is rated 1/5 star."
+msgstr[1] "The item is rated %s/5 stars."
+
+msgid "There is %d chance."
+msgid_plural "There are %f chances."
+msgstr[0] "There is %d chance."
+msgstr[1] "There are %f chances."
+
+msgid "There is %d ${type}."
+msgid_plural "There are %d ${type}."
+msgstr[0] "There is %d ${type}."
+msgstr[1] "There are %d ${type}."
+
+msgid "apple"
+msgid_plural "apples"
+msgstr[0] "apple"
+msgstr[1] "apples"
+
+msgid "banana"
+msgid_plural "bananas"
+msgstr[0] "banana"
+msgstr[1] "bananas"

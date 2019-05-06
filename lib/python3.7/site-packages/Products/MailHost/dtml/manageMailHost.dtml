@@ -1,0 +1,145 @@
+<dtml-var manage_page_header>
+<dtml-var manage_tabs>
+
+<main class="container-fluid">
+
+  <form action="manage_makeChanges" method="post">
+  
+    <div class="form-group row">
+      <label for="title" class="form-label col-sm-3 col-md-2">Title</label>
+      <div class="col-sm-9 col-md-10">
+        <input id="title" class="form-control" type="text" name="title"
+               value="&dtml-title;"/>
+      </div>
+    </div>
+  
+    <div class="form-group row">
+      <label for="smtp_host" class="form-label col-sm-3 col-md-2">
+        SMTP host
+      </label>
+      <div class="col-sm-9 col-md-10">
+        <input id="smtp_host" class="form-control" type="text"
+               name="smtp_host" value="&dtml-smtp_host;"/>
+      </div>
+    </div>
+  
+    <div class="form-group row">
+      <label for="smtp_port" class="form-label col-sm-3 col-md-2">
+        SMTP port
+      </label>
+      <div class="col-sm-9 col-md-10">
+        <input id="smtp_port" class="form-control" type="text"
+               name="smtp_port" value="&dtml-smtp_port;"/>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label for="smtp_uid" class="form-label col-sm-3 col-md-2">
+        SMTP login
+      </label>
+      <div class="col-sm-9 col-md-10">
+        <input id="smtp_uid" class="form-control" type="text"
+               name="smtp_uid" value="&dtml-smtp_uid;"/>
+        <small>Only if the SMTP server requires authentication</small>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label for="smtp_pwd" class="form-label col-sm-3 col-md-2">
+        SMTP password
+      </label>
+      <div class="col-sm-9 col-md-10">
+        <input id="smtp_pwd" class="form-control" type="password"
+               name="smtp_pwd" value="&dtml-smtp_pwd;"/>
+        <small>Only if the SMTP server requires authentication</small>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label for="force_tls" class="form-label col-sm-3 col-md-2">
+        Force TLS
+      </label>
+      <div class="form-check">
+        <input id="force_tls" class="form-check-input" type="checkbox"
+               name="force_tls:boolean"
+               <dtml-if "force_tls">checked</dtml-if>>
+        <small>
+          Enforce an encrypted connection to the SMTP server.
+          Mail delivery fails if the SMTP server does not support encryption
+        </small>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label for="smtp_queue" class="form-label col-sm-3 col-md-2">
+        Asynchronous delivery
+      </label>
+      <div class="form-check">
+        <input id="smtp_queue" class="form-check-input" type="checkbox"
+               name="smtp_queue:boolean"
+               <dtml-if "smtp_queue">checked</dtml-if>>
+        <small>
+          Send email using a separate process and a filesystem queue
+        </small>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label for="smtp_queue_directory" class="form-label col-sm-3 col-md-2">
+        Queue directory
+      </label>
+      <div class="col-sm-9 col-md-10">
+        <input id="smtp_queue_directory" class="form-control" type="text"
+               name="smtp_queue_directory" value="&dtml-smtp_queue_directory;"/>
+        <small>Filesystem queue directory for asynchronous delivery</small>
+        <small class="text-warning">This must be a Maildir folder</small>
+      </div>
+    </div>
+  
+    <div class="zmi-controls">
+      <input class="btn btn-primary" type="submit" name="submit"
+             value="Save Changes" />
+    </div>
+  
+    <dtml-if smtp_queue>
+        <br />
+        <table class="table-striped">
+          <tr>
+            <td align="left" valign="top">
+            <div class="form-label">
+            Mails in queue <br/> 
+            </div>
+            </td>
+            <td align="left" valign="top">
+              <span class="form-help"><dtml-var queueLength></span>
+            </td>
+          </tr>
+          <tr>
+            <td align="left" valign="top">
+            <div class="form-label">
+            Status of queue processor thread<br/> 
+            </div>
+            </td>
+            <td align="left" valign="top">
+              <div class="form-help">
+                <dtml-if "queueThreadAlive()">
+                    Running
+                    <br/>
+                    <a href="manage_restartQueueThread?action=stop">Stop queue processor thread</a> (this may take some seconds)
+                </dtml-if>
+                <dtml-if "not queueThreadAlive()">
+                    Stopped
+                    <br/>
+                    <a href="manage_restartQueueThread?action=start">Start queue processor thread</a> (this may take some seconds)
+                </dtml-if>
+              </div>
+            </td>
+          </tr>
+        </table>
+    </dtml-if>
+  
+  </form>
+
+</main>
+
+<dtml-var manage_page_footer>

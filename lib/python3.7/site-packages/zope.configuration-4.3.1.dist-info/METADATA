@@ -1,0 +1,322 @@
+Metadata-Version: 2.0
+Name: zope.configuration
+Version: 4.3.1
+Summary: Zope Configuration Markup Language (ZCML)
+Home-page: https://github.com/zopefoundation/zope.configuration
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Keywords: zope configuration zcml
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope :: 3
+Provides-Extra: test
+Provides-Extra: docs
+Requires-Dist: setuptools
+Requires-Dist: zope.i18nmessageid
+Requires-Dist: zope.interface
+Requires-Dist: zope.schema (>=4.9)
+Provides-Extra: docs
+Requires-Dist: Sphinx; extra == 'docs'
+Requires-Dist: repoze.sphinx.autointerface; extra == 'docs'
+Provides-Extra: test
+Requires-Dist: manuel; extra == 'test'
+Requires-Dist: zope.schema (>=4.9.0); extra == 'test'
+Requires-Dist: zope.testing; extra == 'test'
+Requires-Dist: zope.testrunner; extra == 'test'
+
+``zope.configuration``
+======================
+
+.. image:: https://img.shields.io/pypi/v/zope.configuration.svg
+    :target: https://pypi.python.org/pypi/zope.configuration/
+    :alt: Latest Version
+
+.. image:: https://travis-ci.org/zopefoundation/zope.configuration.svg?branch=master
+        :target: https://travis-ci.org/zopefoundation/zope.configuration
+
+.. image:: https://readthedocs.org/projects/zopeconfiguration/badge/?version=latest
+        :target: http://zopeconfiguration.readthedocs.io/en/latest/
+        :alt: Documentation Status
+
+The Zope configuration system provides an extensible system for
+supporting various kinds of configurations.
+
+It is based on the idea of configuration directives. Users of the
+configuration system provide configuration directives in some
+language that express configuration choices. The intent is that the
+language be pluggable.  An XML language is provided by default.
+
+Please see http://zopeconfiguration.readthedocs.io/en/latest/ for the documentation.
+
+
+
+
+Changes
+=======
+
+4.3.1 (2019-02-12)
+------------------
+
+- Do not break when running the tests from a wheel.
+
+
+4.3.0 (2018-10-01)
+------------------
+
+- Simplify exception chaining and nested exception error messages.
+  See `issue 43 <https://github.com/zopefoundation/zope.configuration/issues/43>`_.
+
+
+4.2.2 (2018-09-27)
+------------------
+
+- Fix ``GlobalObject`` (and ``GlobalInterface``) no longer allowing
+  multiple leading dots. See `issue 41
+  <https://github.com/zopefoundation/zope.configuration/issues/41>`_.
+
+- Add ``__all__`` to all modules listing the documented members of
+  the module. Note that this is currently a broad list and may be
+  reduced in the future.
+
+
+4.2.1 (2018-09-26)
+------------------
+
+- Fix ``GlobalObject`` (and ``GlobalInterface``) no longer allowing
+  just a single '.'. See `issue 35
+  <https://github.com/zopefoundation/zope.configuration/issues/35>`_.
+
+
+4.2.0 (2018-09-26)
+------------------
+
+- Reach 100% automated test coverage.
+
+- Add support for Python 3.7.
+
+- Drop support for Python 3.3 and remove internal compatibility
+  functions needed to support it. See `issue 20
+  <https://github.com/zopefoundation/zope.configuration/issues/20>`_
+  and `issue 26
+  <https://github.com/zopefoundation/zope.configuration/issues/26>`_.
+
+- Drop support for ``python setup.py test``.
+
+- Make ``zope.configuration.fields.Path`` and
+  ``zope.configuration.config.ConfigurationContext`` expand
+  environment variables and expand user home directories in paths. See
+  `issue 3 <https://github.com/zopefoundation/zope.configuration/issues/3>`_.
+
+- Fix resolving names from a Python 2 package whose ``__init__.py`` has
+  unicode elements in ``__all__``.
+
+- Make ``GroupingContextDecorator`` stop shadowing builtins in its
+  ``__getattr__``. These were not intended as arguments to be used by
+  subclasses, and the signature caused confusion.
+
+- Fix the doctests with zope.schema 4.7 and above, and run the
+  doctests on both Python 2 and Python 3. See `issue 21
+  <https://github.com/zopefoundation/zope.configuration/issues/21>`_.
+
+- Fix ``GlobalObject`` and ``GlobalInterface`` fields to only accept
+  dotted names instead of names with ``/``. Previously, slash
+  delimited names could result in incorrect imports. See `issue 6
+  <https://github.com/zopefoundation/zope.configuration/issues/6>`_.
+
+- Fix the schema fields to include the ``value`` and ``field`` values
+  on exceptions they raise.
+
+- Make ``zope.configuration.fields.PythonIdentifier`` subclass
+  ``PythonIdentifier`` from ``zope.schema``. It now implements ``fromBytes``,
+  always produces a native string, and validates the value in
+  ``fromUnicode``. See `issue 28
+  <https://github.com/zopefoundation/zope.configuration/issues/28>`_.
+
+- Add ``ConfigurationMachine.pass_through_exceptions`` to allow
+  customizing the exceptions that
+  ``ConfigurationMachine.execute_actions`` wraps in a
+  ``ConfigurationExecutionError``. See `issue 10
+  <https://github.com/zopefoundation/zope.configuration/issues/10>`_.
+
+- Stop catching ``BaseException`` and wrapping it in either
+  ``ConfigurationExecutionError`` or ``ZopeXMLConfigurationError``.
+  ``SystemExit`` and ``KeyboardInterrupt`` were always allowed to
+  propagate; now ``GeneratorExit`` and custom subclasses of
+  ``BaseException`` are also allowed te propagate.
+
+4.1.0 (2017-04-26)
+------------------
+
+- Drop support for Python 2.6 and 3.2.
+
+- Add support for Python 3.5 and 3.6.
+
+- Fix the ``domain`` of MessageID fields to be a native string.
+  Previously on Python 3 they were bytes, which meant that they
+  couldn't be used to find translation utilities registered by
+  zope.i18n. See `issue 17 <https://github.com/zopefoundation/zope.configuration/issues/17>`_.
+
+4.0.3 (2014-03-19)
+------------------
+
+- Add explicit support for Python 3.4.
+
+4.0.2 (2012-12-31)
+------------------
+
+- Flesh out PyPI Trove classifiers.
+
+- Remove spurious declaration of 'test' dependency on ``zope.testing``.
+
+4.0.1 (2012-11-21)
+------------------
+
+- Add support for Python 3.3.
+
+- Remove the deprecated 'zope.configuration.stxdocs' script.
+  and made the 'zope.configuration.tests.conditions' helper module
+  (used in running Sphinx doctest snippets) Py3k compatible.
+  https://bugs.launchpad.net/zope.configuration/+bug/1025390
+
+4.0.0 (2012-05-16)
+------------------
+
+- Bring unit test coverage to 100%.
+
+- Automate build of Sphinx HTML docs and running doctest snippets via tox.
+
+- Drop hard testing dependency on ``zope.testing``.
+
+- Add explicit support for PyPy.
+
+- Add explicit support for Python 3.2.
+
+- Drop explicit support for Python 2.4 / 2.5.
+
+- Add support for continuous integration using ``tox`` and ``jenkins``.
+
+- Add ``Sphinx`` documentation.
+
+- Add ``setup.py docs`` alias (installs ``Sphinx`` and dependencies).
+
+- Add ``setup.py dev`` alias (runs ``setup.py develop`` plus installs
+  ``nose`` and ``coverage``).
+
+3.8.1 (2012-05-05)
+------------------
+
+- Fix Python 2.4 backwards incompat (itemgetter used with multiple args);
+  Python 2.4 now works (at least if you use zope.schema == 3.8.1).
+  This is the last release which will support Python 2.4 or 2.5.
+
+3.8.0 (2011-12-06)
+------------------
+
+- Change action structures from tuples to dictionaries to allow for action
+  structure extensibility (merged chrism-dictactions branch).
+
+3.7.4 (2011-04-03)
+------------------
+
+- Apply test fixes for Windows.
+
+3.7.3 (2011-03-11)
+------------------
+
+- Correctly locate packages with a __path__ attribute but no
+  __file__ attribute (such as namespace packages installed with setup.py
+  install --single-version-externally-managed).
+
+- Allow "info" and "includepath" to be passed optionally to context.action.
+
+3.7.2 (2010-04-30)
+------------------
+
+- Prefer the standard libraries doctest module over zope.testing.doctest.
+
+3.7.1 (2010-01-05)
+------------------
+
+- Jython support: use ``__builtin__`` module import rather than assuming
+  ``__builtins__`` is available.
+
+- Jython support: deal with the fact that the Jython SAX parser
+  returns attribute sets that have an empty string indicating no
+  namespace instead of ``None``.
+
+- Allow ``setup.py test`` to run at least a subset of the tests that
+  would be run when using the zope testrunner: ``setup.py test`` runs
+  53 tests, while ``bin/test`` runs 156.
+
+3.7.0 (2009-12-22)
+------------------
+
+- Adjust testing output to newer zope.schema.
+
+- Prefer zope.testing.doctest over doctestunit.
+
+3.6.0 (2009-04-01)
+------------------
+
+- Removed dependency of `zope.deprecation` package.
+
+- Don't suppress deprecation warnings any more in 'zope.configuration'
+  package level. This makes it more likely other packages will generate
+  deprecation warnings now, which will allow us to remove more
+  outdated ones.
+
+- Don't fail when zope.testing is not installed.
+
+- Added missing ``processFile`` method to ``IConfigurationContext``.
+  It is already implemented in the mix-in class,
+  ``zope.configuration.config.ConfigurationContext``, and used by
+  implementations of ``include`` and ``exclude`` directives.
+
+3.5.0 (2009-02-26)
+------------------
+
+- Added the ``exclude`` directive to standard directives. It was
+  previously available via ``zc.configuration`` package and now it's
+  merged into ``zope.configuration``.
+
+- Changed package's mailing list address to zope-dev at zope.org,
+  change "cheeseshop" to "pypi" in the package's url.
+
+3.4.1 (2008-12-11)
+------------------
+
+- Use built-in 'set' type, rather than importin the 'sets' module,
+  which is deprecated in Python 2.6.
+
+- Added support to bootstrap on Jython.
+
+3.4.0 (2007-10-02)
+------------------
+
+- Initial release as a standalone package.
+
+Before 3.4.0
+------------
+
+This package was part of the Zope 3 distribution and did not have its own
+CHANGES.txt. For earlier changes please refer to either our subversion log or
+the CHANGES.txt of earlier Zope 3 releases.
+
+

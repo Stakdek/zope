@@ -1,0 +1,94 @@
+===========================================
+Zope publisher integration with PasteDeploy
+===========================================
+
+PasteDeploy [#pastedeploy]_ provides a framework for assembling WSGI
+[#wsgi]_ components.  It provides a framework for defining component
+factories that facilitates assembly based on simple configuration
+files.  The zope.publisher package provides an application factory for
+defining publisher-based applications.
+
+To use in paste, you include a configuration section like::
+
+where:
+
+  [app:main]
+  use = egg:zope.publisher
+  publication = egg:zope.publisher#sample
+  foo = bar
+
+This example defines a "main" application using the zope.publisher
+factory.  The only option required by zope.publisher is the
+publication option. This names an application-defined publication
+[#publication]_ factory.  The factory is passed a dictionary of
+"global" options, as defined by PasteDeploy, and keyword arguments
+containing options from the application section, other than the use
+and publication options.  In the example above, the foo option is
+passed.
+
+Detailed example
+================
+
+We will use python3 compatible print statement, so import it from the
+future.
+
+    >>> from __future__ import print_function
+
+There's a sample publication class in
+zope.publisher.tests.test_paste.SamplePublication. It is a class that
+takes a global_config positional argument and arbitrary keyword
+arguments. It prints out this information as well as request data.
+It's registered as the "sample" entry point in the
+"zope.publisher.publication_factory" group.  
+
+We can create a WSGI application for this sample publication by
+calling the zope.publisher.paste.Application factory.  We'll get this
+by looking it up with package resources:
+
+    >>> import pkg_resources
+    >>> app_factory = pkg_resources.load_entry_point(
+    ...     'zope.publisher', 'paste.app_factory', 'main')
+    
+    >>> app = app_factory(dict(global_option=42), 
+    ...                   publication='egg:zope.publisher#sample',
+    ...                   app_option=1)
+
+Notice that we passed a publication name using the "egg" protocol.
+This is the only protocol currently supported.
+
+We can perform a test web request by calling the app factory with an
+environment dictionary and a start-response function:
+
+    >>> def start_response(status, headers):
+    ...     print(status)
+    >>> import io
+    >>> env = {'CONTENT_TYPE': 'text/plain', 'PATH_INFO': '/a/b',
+    ...        'REQUEST_METHOD': 'GET', 'wsgi.input':  io.BytesIO(b'')}
+
+    >>> for data in app(env, start_response):
+    ...     print(data.decode('latin-1'))
+    200 Ok
+    <html><body>Thanks for your request:<br />
+    <h1>BrowserRequest</h1>
+    <pre>
+    CONTENT_TYPE:	text/plain
+    PATH_INFO:	/a/b
+    QUERY_STRING:	
+    REQUEST_METHOD:	GET
+    wsgi.input:	<...io.BytesIO object at ...>
+    </pre>
+    <h1>Publication arguments:</h1>
+    Globals: {'global_option': 42}<br />
+    Options: {'app_option': 1}
+    </body></html>
+
+
+
+.. [#paste] http://pythonpaste.org/deploy/
+
+.. [#wsgi] http://www.python.org/dev/peps/pep-0333/
+
+.. [#publication] Publications provide the interface between the
+   publisher and the application.  See
+   zope.publisher.interfaces.IPublication and
+   zope.publisher.browser.interfaces.IBrowserPublication.

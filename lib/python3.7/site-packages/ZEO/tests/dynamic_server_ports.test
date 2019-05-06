@@ -1,0 +1,85 @@
+The storage server can be told to bind to port 0, allowing the OS to
+pick a port dynamically.  For this to be useful, there needs to be a
+way to tell someone. For this reason, the server posts events to
+ZODB.notify.
+
+    >>> import ZODB.event
+    >>> old_notify = ZODB.event.notify
+
+    >>> last_event = None
+    >>> def notify(event):
+    ...     global last_event
+    ...     last_event = event
+    >>> ZODB.event.notify = notify
+
+Now, let's start a server and verify that we get a serving event:
+
+    >>> import ZEO
+    >>> addr, stop = ZEO.server()
+
+    >>> isinstance(last_event, ZEO.StorageServer.Serving)
+    True
+
+    >>> last_event.address == addr
+    True
+
+    >>> server = last_event.server
+    >>> server.addr == addr
+    True
+
+Let's make sure we can connect.
+
+    >>> client = ZEO.client(last_event.address).close()
+
+If we close the server, we'll get a closed event:
+
+    >>> stop()
+    >>> isinstance(last_event, ZEO.StorageServer.Closed)
+    True
+    >>> last_event.server is server
+    True
+
+If we pass an empty string as the host part of the server address, we
+can't really assign a single address, so the server addr attribute is
+left alone:
+
+    >>> addr, stop = ZEO.server(port=('', 0))
+    >>> isinstance(last_event, ZEO.StorageServer.Serving)
+    True
+
+    >>> last_event.address[1] > 0
+    True
+
+    >>> last_event.server.addr
+    ('', 0)
+
+    >>> stop()
+
+The runzeo module provides some process support, including getting the
+server configuration via a ZConfig configuration file.  To spell a
+dynamic port using ZConfig, you'd use a hostname by itself. In this
+case, ZConfig passes None as the port.
+
+    >>> import ZEO.runzeo
+    >>> with open('conf', 'w') as f:
+    ...    _ = f.write("""
+    ... <zeo>
+    ...     address 127.0.0.1
+    ... </zeo>
+    ... <mappingstorage>
+    ... </mappingstorage>
+    ... """)
+    >>> options = ZEO.runzeo.ZEOOptions()
+    >>> options.realize('-C conf'.split())
+    >>> options.address
+    ('127.0.0.1', None)
+
+    >>> rs = ZEO.runzeo.ZEOServer(options)
+    >>> rs.check_socket()
+    >>> options.address
+    ('127.0.0.1', 0)
+
+
+.. cleanup
+
+    >>> ZODB.event.notify = old_notify

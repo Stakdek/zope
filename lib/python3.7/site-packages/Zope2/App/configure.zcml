@@ -1,0 +1,22 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta"
+    xmlns:five="http://namespaces.zope.org/five">
+
+  <include file="exclude.zcml" />
+  <include file="meta.zcml" />
+  <include package="AccessControl" file="permissions.zcml" />
+
+  <include file="traversing.zcml" />
+  <include package="OFS "/>
+  <include package="ZPublisher" />
+
+  <include package="Products.Five" />
+  <meta:redefinePermission from="zope2.Public" to="zope.Public" />
+
+  <securityPolicy
+      component="AccessControl.security.SecurityPolicy" />
+
+  <include package="zmi.styles" />
+
+</configure>

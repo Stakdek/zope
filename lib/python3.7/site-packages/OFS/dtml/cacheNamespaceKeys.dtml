@@ -1,0 +1,13 @@
+		<div class="form-group row">
+			<label for="keys" class="form-label col-sm-3 col-md-2">Names from the DTML namespace to use as cache keys</label>
+			<div class="col-sm-9 col-md-10">
+				<textarea class="form-control" name="keys:lines" rows="5"
+					><dtml-in getCacheNamespaceKeys>&dtml-sequence-item;<dtml-var "'\n'"></dtml-in></textarea>
+
+				<div class="zmi-controls">
+					<input class="btn btn-primary" type="submit" name="setCacheNamespaceKeys:method" value="Save Changes" />
+				</div>
+
+			</div>
+		</div>
+

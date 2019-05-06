@@ -1,0 +1,12 @@
+<div xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:tal="http://xml.zope.org/namespaces/tal">
+  <span tal:content="context/ns1:parent/title/ns2:upper" />
+  <span tal:content="context/ns1:parent/child/child/date/ns3:fullDateTime" />
+  <span tal:content="context/ns4:link:main" />
+  <span tal:content="context/ns4:page" />
+  <span tal:content="context/ns4:page/another" />
+  <span tal:content="context/ns4:page/yet/another|nothing" />
+  <span tal:content="context/ns4:zope.Public" />
+  <span tal:content="context/ns4:text-to-html" />
+  <span tal:content="context/ns5:page/yet/even/another" />
+</div>

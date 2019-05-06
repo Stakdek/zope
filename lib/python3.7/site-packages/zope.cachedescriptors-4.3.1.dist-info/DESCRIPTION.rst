@@ -1,0 +1,604 @@
+===========================
+ ``zope.cachedescriptors``
+===========================
+
+.. image:: https://img.shields.io/pypi/v/zope.cachedescriptors.svg
+        :target: https://pypi.org/project/zope.cachedescriptors/
+        :alt: Latest release
+
+.. image:: https://img.shields.io/pypi/pyversions/zope.cachedescriptors.svg
+        :target: https://pypi.org/project/zope.cachedescriptors/
+        :alt: Supported Python versions
+
+.. image:: https://travis-ci.org/zopefoundation/zope.cachedescriptors.svg?branch=master
+        :target: https://travis-ci.org/zopefoundation/zope.cachedescriptors
+
+.. image:: https://readthedocs.org/projects/zopehookable/badge/?version=latest
+        :target: http://zopehookable.readthedocs.io/en/latest/
+        :alt: Documentation Status
+
+.. image:: https://coveralls.io/repos/github/zopefoundation/zope.cachedescriptors/badge.svg?branch=master
+        :target: https://coveralls.io/github/zopefoundation/zope.cachedescriptors?branch=master
+
+Cached descriptors cache their output.  They take into account
+instance attributes that they depend on, so when the instance
+attributes change, the descriptors will change the values they
+return.
+
+Cached descriptors cache their data in ``_v_`` attributes, so they are
+also useful for managing the computation of volatile attributes for
+persistent objects.
+
+Persistent descriptors:
+
+- ``property``
+
+  A simple computed property.
+
+  See ``src/zope/cachedescriptors/property.rst``.
+
+- ``method``
+
+  Idempotent method.  The return values are cached based on method
+  arguments and on any instance attributes that the methods are
+  defined to depend on.
+
+  .. note::
+
+     Only a cache based on arguments has been implemented so far.
+
+  See ``src/zope/cachedescriptors/method.rst``.
+
+===================
+ Cached Properties
+===================
+
+Cached properties are computed properties that cache their computed
+values.  They take into account instance attributes that they depend
+on, so when the instance attributes change, the properties will change
+the values they return.
+
+CachedProperty
+==============
+
+Cached properties cache their data in ``_v_`` attributes, so they are
+also useful for managing the computation of volatile attributes for
+persistent objects. Let's look at an example:
+
+    >>> from zope.cachedescriptors import property
+    >>> import math
+
+    >>> class Point:
+    ...
+    ...     def __init__(self, x, y):
+    ...         self.x, self.y = x, y
+    ...
+    ...     @property.CachedProperty('x', 'y')
+    ...     def radius(self):
+    ...         print('computing radius')
+    ...         return math.sqrt(self.x**2 + self.y**2)
+
+    >>> point = Point(1.0, 2.0)
+
+If we ask for the radius the first time:
+
+    >>> '%.2f' % point.radius
+    computing radius
+    '2.24'
+
+We see that the radius function is called, but if we ask for it again:
+
+    >>> '%.2f' % point.radius
+    '2.24'
+
+The function isn't called.  If we change one of the attribute the
+radius depends on, it will be recomputed:
+
+    >>> point.x = 2.0
+    >>> '%.2f' % point.radius
+    computing radius
+    '2.83'
+
+But changing other attributes doesn't cause recomputation:
+
+    >>> point.q = 1
+    >>> '%.2f' % point.radius
+    '2.83'
+
+Note that we don't have any non-volitile attributes added:
+
+    >>> names = [name for name in point.__dict__ if not name.startswith('_v_')]
+    >>> names.sort()
+    >>> names
+    ['q', 'x', 'y']
+
+For backwards compatibility, the same thing can alternately be written
+without using decorator syntax:
+
+    >>> class Point:
+    ...
+    ...     def __init__(self, x, y):
+    ...         self.x, self.y = x, y
+    ...
+    ...     def radius(self):
+    ...         print('computing radius')
+    ...         return math.sqrt(self.x**2 + self.y**2)
+    ...     radius = property.CachedProperty(radius, 'x', 'y')
+
+    >>> point = Point(1.0, 2.0)
+
+If we ask for the radius the first time:
+
+    >>> '%.2f' % point.radius
+    computing radius
+    '2.24'
+
+We see that the radius function is called, but if we ask for it again:
+
+    >>> '%.2f' % point.radius
+    '2.24'
+
+The function isn't called.  If we change one of the attribute the
+radius depends on, it will be recomputed:
+
+    >>> point.x = 2.0
+    >>> '%.2f' % point.radius
+    computing radius
+    '2.83'
+
+Documentation and the ``__name__`` are preserved if the attribute is accessed through
+the class. This allows Sphinx to extract the documentation.
+
+    >>> class Point:
+    ...
+    ...     def __init__(self, x, y):
+    ...         self.x, self.y = x, y
+    ...
+    ...     @property.CachedProperty('x', 'y')
+    ...     def radius(self):
+    ...         '''The length of the line between self.x and self.y'''
+    ...         print('computing radius')
+    ...         return math.sqrt(self.x**2 + self.y**2)
+
+    >>> print(Point.radius.__doc__)
+    The length of the line between self.x and self.y
+    >>> print(Point.radius.__name__)
+    radius
+
+It is possible to specify a CachedProperty that has no dependencies.
+For backwards compatibility this can be written in a few different ways::
+
+    >>> class Point:
+    ...     def __init__(self, x, y):
+    ...         self.x, self.y = x, y
+    ...
+    ...     @property.CachedProperty
+    ...     def no_deps_no_parens(self):
+    ...         print("No deps, no parens")
+    ...         return 1
+    ...
+    ...     @property.CachedProperty()
+    ...     def no_deps(self):
+    ...         print("No deps")
+    ...         return 2
+    ...
+    ...     def no_deps_old_style(self):
+    ...         print("No deps, old style")
+    ...         return 3
+    ...     no_deps_old_style = property.CachedProperty(no_deps_old_style)
+
+
+    >>> point = Point(1.0, 2.0)
+    >>> point.no_deps_no_parens
+    No deps, no parens
+    1
+    >>> point.no_deps_no_parens
+    1
+    >>> point.no_deps
+    No deps
+    2
+    >>> point.no_deps
+    2
+    >>> point.no_deps_old_style
+    No deps, old style
+    3
+    >>> point.no_deps_old_style
+    3
+
+
+Lazy Computed Attributes
+========================
+
+The `property` module provides another descriptor that supports a
+slightly different caching model: lazy attributes.  Like cached
+proprties, they are computed the first time they are used. however,
+they aren't stored in volatile attributes and they aren't
+automatically updated when other attributes change.  Furthermore, the
+store their data using their attribute name, thus overriding
+themselves. This provides much faster attribute access after the
+attribute has been computed. Let's look at the previous example using
+lazy attributes:
+
+    >>> class Point:
+    ...
+    ...     def __init__(self, x, y):
+    ...         self.x, self.y = x, y
+    ...
+    ...     @property.Lazy
+    ...     def radius(self):
+    ...         print('computing radius')
+    ...         return math.sqrt(self.x**2 + self.y**2)
+
+    >>> point = Point(1.0, 2.0)
+
+If we ask for the radius the first time:
+
+    >>> '%.2f' % point.radius
+    computing radius
+    '2.24'
+
+We see that the radius function is called, but if we ask for it again:
+
+    >>> '%.2f' % point.radius
+    '2.24'
+
+The function isn't called.  If we change one of the attribute the
+radius depends on, it still isn't called:
+
+    >>> point.x = 2.0
+    >>> '%.2f' % point.radius
+    '2.24'
+
+If we want the radius to be recomputed, we have to manually delete it:
+
+    >>> del point.radius
+
+    >>> point.x = 2.0
+    >>> '%.2f' % point.radius
+    computing radius
+    '2.83'
+
+Note that the radius is stored in the instance dictionary:
+
+    >>> '%.2f' % point.__dict__['radius']
+    '2.83'
+
+The lazy attribute needs to know the attribute name.  It normally
+deduces the attribute name from the name of the function passed. If we
+want to use a different name, we need to pass it:
+
+    >>> def d(point):
+    ...     print('computing diameter')
+    ...     return 2*point.radius
+
+    >>> Point.diameter = property.Lazy(d, 'diameter')
+    >>> '%.2f' % point.diameter
+    computing diameter
+    '5.66'
+
+Documentation and the ``__name__`` are preserved if the attribute is accessed through
+the class. This allows Sphinx to extract the documentation.
+
+    >>> class Point:
+    ...
+    ...     def __init__(self, x, y):
+    ...         self.x, self.y = x, y
+    ...
+    ...     @property.Lazy
+    ...     def radius(self):
+    ...         '''The length of the line between self.x and self.y'''
+    ...         print('computing radius')
+    ...         return math.sqrt(self.x**2 + self.y**2)
+
+    >>> print(Point.radius.__doc__)
+    The length of the line between self.x and self.y
+    >>> print(Point.radius.__name__)
+    radius
+
+The documentation of the attribute when accessed through the
+instance will be the same as the return-value:
+
+   >>> p = Point(1.0, 2.0)
+   >>> p.radius.__doc__ == float.__doc__
+   computing radius
+   True
+
+This is the same behaviour as the standard Python ``property``
+decorator.
+
+readproperty
+============
+
+readproperties are like lazy computed attributes except that the
+attribute isn't set by the property:
+
+
+    >>> class Point:
+    ...
+    ...     def __init__(self, x, y):
+    ...         self.x, self.y = x, y
+    ...
+    ...     @property.readproperty
+    ...     def radius(self):
+    ...         print('computing radius')
+    ...         return math.sqrt(self.x**2 + self.y**2)
+
+    >>> point = Point(1.0, 2.0)
+
+    >>> '%.2f' % point.radius
+    computing radius
+    '2.24'
+
+    >>> '%.2f' % point.radius
+    computing radius
+    '2.24'
+
+But you *can* replace the property by setting a value. This is the major
+difference to the builtin `property`:
+
+    >>> point.radius = 5
+    >>> point.radius
+    5
+
+Documentation and the ``__name__`` are preserved if the attribute is accessed through
+the class. This allows Sphinx to extract the documentation.
+
+    >>> class Point:
+    ...
+    ...     def __init__(self, x, y):
+    ...         self.x, self.y = x, y
+    ...
+    ...     @property.readproperty
+    ...     def radius(self):
+    ...         '''The length of the line between self.x and self.y'''
+    ...         print('computing radius')
+    ...         return math.sqrt(self.x**2 + self.y**2)
+
+    >>> print(Point.radius.__doc__)
+    The length of the line between self.x and self.y
+    >>> print(Point.radius.__name__)
+    radius
+
+cachedIn
+========
+
+The `cachedIn` property allows to specify the attribute where to store the
+computed value:
+
+    >>> class Point:
+    ...
+    ...     def __init__(self, x, y):
+    ...         self.x, self.y = x, y
+    ...
+    ...     @property.cachedIn('_radius_attribute')
+    ...     def radius(self):
+    ...         print('computing radius')
+    ...         return math.sqrt(self.x**2 + self.y**2)
+
+    >>> point = Point(1.0, 2.0)
+
+    >>> '%.2f' % point.radius
+    computing radius
+    '2.24'
+
+    >>> '%.2f' % point.radius
+    '2.24'
+
+The radius is cached in the attribute with the given name, `_radius_attribute`
+in this case:
+
+    >>> '%.2f' % point._radius_attribute
+    '2.24'
+
+When the attribute is removed the radius is re-calculated once. This allows
+invalidation:
+
+    >>> del point._radius_attribute
+
+    >>> '%.2f' % point.radius
+    computing radius
+    '2.24'
+
+    >>> '%.2f' % point.radius
+    '2.24'
+
+Documentation is preserved if the attribute is accessed through
+the class. This allows Sphinx to extract the documentation.
+
+    >>> class Point:
+    ...
+    ...     def __init__(self, x, y):
+    ...         self.x, self.y = x, y
+    ...
+    ...     @property.cachedIn('_radius_attribute')
+    ...     def radius(self):
+    ...         '''The length of the line between self.x and self.y'''
+    ...         print('computing radius')
+    ...         return math.sqrt(self.x**2 + self.y**2)
+
+    >>> print(Point.radius.__doc__)
+    The length of the line between self.x and self.y
+
+==============
+ Method Cache
+==============
+
+cachedIn
+========
+
+The `cachedIn` property allows to specify the attribute where to store the
+computed value:
+
+    >>> import math
+    >>> from zope.cachedescriptors import method
+
+    >>> class Point(object):
+    ...
+    ...     def __init__(self, x, y):
+    ...         self.x, self.y = x, y
+    ...
+    ...     @method.cachedIn('_cache')
+    ...     def distance(self, x, y):
+    ...         """Compute the distance"""
+    ...         print('computing distance')
+    ...         return math.hypot(self.x - x, self.y - y)
+    ...
+    >>> point = Point(1.0, 2.0)
+
+The value is computed once:
+
+    >>> point.distance(2, 2)
+    computing distance
+    1.0
+    >>> point.distance(2, 2)
+    1.0
+
+
+Using different arguments calculates a new distance:
+
+    >>> point.distance(5, 2)
+    computing distance
+    4.0
+    >>> point.distance(5, 2)
+    4.0
+
+
+The data is stored at the given `_cache` attribute:
+
+    >>> isinstance(point._cache, dict)
+    True
+
+    >>> sorted(point._cache.items())
+    [(((2, 2), ()), 1.0), (((5, 2), ()), 4.0)]
+
+
+It is possible to exlicitly invalidate the data:
+
+    >>> point.distance.invalidate(point, 5, 2)
+    >>> point.distance(5, 2)
+    computing distance
+    4.0
+
+Invalidating keys which are not in the cache, does not result in an error:
+
+    >>> point.distance.invalidate(point, 47, 11)
+
+The documentation of the function is preserved (whether through the
+instance or the class), allowing Sphinx to extract it::
+
+    >>> print(point.distance.__doc__)
+    Compute the distance
+    >>> print(point.distance.__name__)
+    distance
+
+    >>> print(Point.distance.__doc__)
+    Compute the distance
+    >>> print(Point.distance.__name__)
+    distance
+
+It is possible to pass in a factory for the cache attribute. Create another
+Point class:
+
+
+    >>> class MyDict(dict):
+    ...     pass
+    >>> class Point(object):
+    ...
+    ...     def __init__(self, x, y):
+    ...         self.x, self.y = x, y
+    ...
+    ...     @method.cachedIn('_cache', MyDict)
+    ...     def distance(self, x, y):
+    ...         print('computing distance')
+    ...         return math.sqrt((self.x - x)**2 + (self.y - y)**2)
+    ...
+    >>> point = Point(1.0, 2.0)
+    >>> point.distance(2, 2)
+    computing distance
+    1.0
+
+Now the cache is a MyDict instance:
+
+    >>> isinstance(point._cache, MyDict)
+    True
+
+=========
+ Changes
+=========
+
+4.3.1 (2017-12-09)
+==================
+
+- Fix test which will break in the upcomming Python 3.7 release.
+
+
+4.3.0 (2017-07-27)
+==================
+
+- Add support for Python 3.6.
+
+- Drop support for Python 3.3.
+
+
+4.2.0 (2016-09-05)
+==================
+
+- Add support for Python 3.5.
+
+- Drop support for Python 2.6 and 3.2.
+
+- The properties from the ``property`` module all preserve the
+  documentation string of the underlying function, and all except
+  ``cachedIn`` preserve everything that ``functools.update_wrapper``
+  preserves.
+
+- ``property.CachedProperty`` is usable as a decorator, with or
+  without dependent attribute names.
+
+- ``method.cachedIn`` preserves the documentation string of the
+  underlying function, and everything else that ``functools.wraps`` preserves.
+
+4.1.0 (2014-12-26)
+==================
+
+- Add support for PyPy and PyPy3.
+
+- Add support for Python 3.4.
+
+- Add support for testing on Travis.
+
+
+4.0.0 (2013-02-13)
+==================
+
+- Drop support for Python 2.4 and 2.5.
+
+- Add support for Python 3.2 and 3.3.
+
+
+3.5.1 (2010-04-30)
+==================
+
+- Remove undeclared testing dependency on zope.testing.
+
+3.5.0 (2009-02-10)
+==================
+
+- Remove dependency on ZODB by allowing to specify storage factory for
+  ``zope.cachedescriptors.method.cachedIn`` which is now ``dict`` by default.
+  If you need to use BTree instead, you must pass it as ``factory`` argument
+  to the ``zope.cachedescriptors.method.cachedIn`` decorator.
+
+- Remove zpkg-related file.
+
+- Clean up package description and documentation a bit.
+
+- Change package mailing list address to zope-dev at zope.org, as
+  zope3-dev at zope.org is now retired.
+
+3.4.0 (2007-08-30)
+==================
+
+Initial release as an independent package
+
+

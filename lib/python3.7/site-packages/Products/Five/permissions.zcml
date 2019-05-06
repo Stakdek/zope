@@ -1,0 +1,9 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           i18n_domain="Five">
+
+  <permission
+      id="five.ManageSite"
+      title="Manage Five local sites"
+      />
+
+</configure>

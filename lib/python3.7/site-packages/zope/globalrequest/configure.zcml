@@ -1,0 +1,16 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="zope.globalrequest">
+
+  <subscriber
+      handler=".subscribers.set"
+      for="zope.traversing.interfaces.IContainmentRoot
+           zope.traversing.interfaces.IBeforeTraverseEvent"
+      trusted="y" />
+
+  <subscriber
+      handler=".subscribers.clear"
+      for="zope.publisher.interfaces.IEndRequestEvent"
+      trusted="y" />
+
+</configure>

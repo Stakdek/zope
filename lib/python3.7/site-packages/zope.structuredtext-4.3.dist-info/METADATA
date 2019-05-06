@@ -1,0 +1,145 @@
+Metadata-Version: 2.0
+Name: zope.structuredtext
+Version: 4.3
+Summary: StructuredText parser
+Home-page: http://github.com/zopefoundation/zope.structuredtext
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development
+Provides-Extra: test
+Provides-Extra: docs
+Requires-Dist: setuptools
+Provides-Extra: docs
+Requires-Dist: Sphinx; extra == 'docs'
+Provides-Extra: test
+Requires-Dist: zope.testrunner; extra == 'test'
+
+=====================
+ zope.structuredtext
+=====================
+
+.. image:: https://img.shields.io/pypi/v/zope.structuredtext.svg
+        :target: https://pypi.python.org/pypi/zope.structuredtext/
+        :alt: Latest release
+
+.. image:: https://img.shields.io/pypi/pyversions/zope.structuredtext.svg
+        :target: https://pypi.org/project/zope.structuredtext/
+        :alt: Supported Python versions
+
+.. image:: https://travis-ci.org/zopefoundation/zope.structuredtext.svg?branch=master
+        :target: https://travis-ci.org/zopefoundation/zope.structuredtext
+
+.. image:: https://coveralls.io/repos/github/zopefoundation/zope.structuredtext/badge.svg?branch=master
+        :target: https://coveralls.io/github/zopefoundation/zope.structuredtext?branch=master
+
+.. image:: https://readthedocs.org/projects/zopestructuredtext/badge/?version=latest
+        :target: https://zopestructuredtext.readthedocs.org/en/latest/
+        :alt: Documentation Status
+
+This package provides a parser and renderers for the classic Zope
+"structured text" markup dialect (STX).  STX is a plain text markup in
+which document structure is signalled primarily by indentation
+
+Please see https://zopestructuredtext.readthedocs.org/ for documentation.
+
+
+=========
+ Changes
+=========
+
+4.3 (2018-10-09)
+================
+
+- Add support for Python 3.7.
+
+
+4.2.0 (2017-09-05)
+==================
+
+- Add support for Python 3.5 and 3.6.
+
+- Drop support for Python 2.6 and 3.3.
+
+- Add support for PyPy and PyPy3.
+
+- Support several new elements (inner and named links, underlines,
+  etc) in the docbook writer.
+
+- Fix the XML output of ``DocBookBook``.
+
+- 100% test coverage, maintained by CI and tox.
+
+- Unused internal code in the ``stdom`` module was removed. See `issue
+  3 <https://github.com/zopefoundation/zope.structuredtext/issues/3>`_.
+
+4.1.0 (2014-12-29)
+==================
+
+- Drop dependency on ``six``.
+
+- Add support for Python 3.4.
+
+- Add support for testing on Travis.
+
+
+4.0.0 (2013-02-25)
+==================
+
+- Add support for Python 3.3.
+
+- Drop support for Python 2.4 and 2.5.
+
+
+3.5.1 (2010-12-03)
+==================
+
+- Remove antique copyright assertions in regression texts, in conformance
+  with repository policy.
+
+
+3.5.0 (2010-04-30)
+==================
+
+- Update docs to conform to ZTK / Sphinx usage.
+
+- LP #120376:  Output valid html for non-ASCII characters.
+
+
+3.4.0 (2007/09/01)
+==================
+
+- Public release for completeness of Zope 3.4.
+
+
+3.2.0 (2006/01/05)
+==================
+
+- Corresponds to the verison of the ``zope.structuredtext`` package shipped
+  as part of the Zope 3.2.0 release.
+
+- Only coding style / documentation changes.
+
+
+3.0.0 (2004/11/07)
+==================
+
+- Corresponds to the verison of the ``zope.structuredtext`` package shipped
+  as part of the Zope X3.0.0 release.
+
+

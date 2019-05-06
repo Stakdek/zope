@@ -1,0 +1,18 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
+<book>
+<title>Test</title>
+<section>
+<title>Test</title>
+<para>
+
+For instance:<programlisting>
+<![CDATA[
+<table border="0">
+  <tr><td>blabla</td></tr>
+</table>
+]]></programlisting>
+</para>
+
+
+</section>
+</book>

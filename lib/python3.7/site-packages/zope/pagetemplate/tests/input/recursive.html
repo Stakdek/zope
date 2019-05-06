@@ -1,0 +1,7 @@
+<!-- See https://bugs.launchpad.net/zope.pagetemplate/+bug/732972 -->
+<ul metal:define-macro="tree">
+  <li tal:content="context/name" />
+  <li tal:repeat="context context/children">
+    <ul metal:use-macro="template/macros/tree" />
+  </li>
+</ul>

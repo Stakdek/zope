@@ -1,0 +1,21 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
+<book>
+<para>
+
+Example In Numbered Lists</para>
+
+<orderedlist>
+<listitem><para>
+This is an example:<programlisting>
+<![CDATA[
+Hi There
+]]></programlisting>
+</para></listitem>
+<listitem><para>
+This is another example:<programlisting>
+<![CDATA[
+Good bye.
+]]></programlisting>
+</para></listitem>
+</orderedlist>
+</book>

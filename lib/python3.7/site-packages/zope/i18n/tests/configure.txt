@@ -1,0 +1,18 @@
+Package configuration
+=====================
+
+The ``zope.i18n`` package provides a ZCML file that configures a utility and
+some security:
+
+  >>> from zope.configuration.xmlconfig import XMLConfig
+  >>> import zope.i18n
+
+  >>> XMLConfig('configure.zcml', zope.i18n.locales)()
+
+  >>> len(list(zope.component.getGlobalSiteManager().registeredUtilities()))
+  13
+
+  >>> XMLConfig('configure.zcml', zope.i18n)()
+
+  >>> len(list(zope.component.getGlobalSiteManager().registeredUtilities()))
+  15

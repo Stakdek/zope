@@ -1,0 +1,49 @@
+<configure xmlns:meta="http://namespaces.zope.org/meta">
+
+  <meta:directives namespace="http://namespaces.zope.org/browser">
+
+    <meta:directive
+        name="menu"
+        schema=".metadirectives.IMenuDirective"
+        handler=".metaconfigure.menuDirective"
+        />
+
+    <meta:complexDirective
+        name="menuItems"
+        schema=".metadirectives.IMenuItemsDirective"
+        handler=".metaconfigure.menuItemsDirective"
+        >
+
+      <meta:subdirective
+          name="menuItem"
+          schema=".metadirectives.IMenuItemSubdirective"
+          />
+
+      <meta:subdirective
+          name="subMenuItem"
+          schema=".metadirectives.ISubMenuItemSubdirective"
+          />
+
+    </meta:complexDirective>
+
+    <meta:directive
+        name="menuItem"
+        schema=".metadirectives.IMenuItemDirective"
+        handler=".metaconfigure.menuItemDirective"
+        />
+
+    <meta:directive
+        name="subMenuItem"
+        schema=".metadirectives.ISubMenuItemDirective"
+        handler=".metaconfigure.subMenuItemDirective"
+        />
+
+    <meta:directive
+        name="addMenuItem"
+        schema=".metadirectives.IAddMenuItemDirective"
+        handler=".metaconfigure.addMenuItem"
+        />
+
+  </meta:directives>
+
+</configure>

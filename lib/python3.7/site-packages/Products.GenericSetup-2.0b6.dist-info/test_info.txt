@@ -1,0 +1,4 @@
+test_module = 
+test_suite = Products.GenericSetup.tests
+test_loader = zope.testrunner.eggsupport:SkipLayers
+tests_require = zope.testrunner

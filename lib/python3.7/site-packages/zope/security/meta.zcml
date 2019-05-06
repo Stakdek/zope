@@ -1,0 +1,73 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta">
+
+  <meta:directive
+      namespace="http://namespaces.zope.org/zope"
+      name="permission"
+      schema=".zcml.IPermissionDirective"
+      handler=".zcml.permission" />
+
+  <meta:directive
+      name="securityPolicy"
+      namespace="http://namespaces.zope.org/zope"
+      schema=".zcml.ISecurityPolicyDirective"
+      handler=".zcml.securityPolicy" 
+      />
+
+  <meta:directive
+      name="redefinePermission"
+      namespace="http://namespaces.zope.org/meta"
+      schema=".zcml.IRedefinePermission"
+      handler=".zcml.redefinePermission" />
+
+  <meta:directives namespace="http://namespaces.zope.org/zope">
+
+    <meta:complexDirective
+        name="class"
+        schema=".metadirectives.IClassDirective"
+        handler=".metaconfigure.ClassDirective"
+        >
+
+      <meta:subdirective
+          name="implements"
+          schema=".metadirectives.IImplementsSubdirective"
+          />
+
+      <meta:subdirective
+          name="require"
+          schema=".metadirectives.IRequireSubdirective"
+          />
+
+      <meta:subdirective
+          name="allow"
+          schema=".metadirectives.IAllowSubdirective"
+          />
+
+      <meta:subdirective
+          name="factory"
+          schema=".metadirectives.IFactorySubdirective"
+          />
+
+    </meta:complexDirective>
+  </meta:directives>
+
+  <meta:groupingDirective
+      name="module"
+      namespace="http://namespaces.zope.org/zope"
+      schema=".metadirectives.IModule"
+      handler="zope.configuration.config.GroupingContextDecorator" />
+
+  <meta:directive
+      name="allow"
+      namespace="http://namespaces.zope.org/zope"
+      schema=".metadirectives.IAllow"
+      handler=".metaconfigure.allow" />
+
+  <meta:directive
+      name="require"
+      namespace="http://namespaces.zope.org/zope"
+      schema=".metadirectives.IRequire"
+      handler=".metaconfigure.require" />
+
+</configure>

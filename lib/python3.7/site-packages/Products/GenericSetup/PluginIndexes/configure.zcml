@@ -1,0 +1,17 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml">
+
+  <adapter factory=".exportimport.PluggableIndexNodeAdapter"/>
+
+  <adapter factory=".exportimport.DateIndexNodeAdapter"/>
+
+  <adapter factory=".exportimport.DateRangeIndexNodeAdapter"/>
+
+  <adapter factory=".exportimport.PathIndexNodeAdapter"/>
+
+  <adapter factory=".exportimport.FilteredSetNodeAdapter"/>
+
+  <adapter factory=".exportimport.TopicIndexNodeAdapter"/>
+
+</configure>

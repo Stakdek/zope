@@ -1,0 +1,23 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:zcml="http://namespaces.zope.org/zcml">
+
+  <configure zcml:condition="installed zope.component">
+
+    <include file="meta.zcml" package="zope.component" />
+
+    <adapter factory=".location.LocationProxy"
+             for="*" />
+
+    <adapter factory=".traversing.LocationPhysicallyLocatable"
+             for=".interfaces.ILocation" />
+
+    <adapter factory=".traversing.RootPhysicallyLocatable"
+             for=".interfaces.IRoot" />
+
+    <adapter zcml:condition="installed zope.copy"
+             factory=".pickling.LocationCopyHook"
+             for=".interfaces.ILocation" />
+
+  </configure>
+
+</configure>

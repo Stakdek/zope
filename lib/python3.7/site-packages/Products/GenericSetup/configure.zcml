@@ -1,0 +1,120 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:meta="http://namespaces.zope.org/meta"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="genericsetup">
+
+  <include package=".browser"/>
+
+  <include package=".OFSP"/>
+
+  <include package=".PluginIndexes"/>
+
+  <include package=".PythonScripts"/>
+
+  <include package=".PageTemplates"/>
+
+  <include package=".ZCatalog"/>
+
+  <include package=".ZCTextIndex"/>
+
+  <include
+      zcml:condition="installed Products.MailHost"
+      package="Products.MailHost"
+      />
+  <meta:provides feature="moved_mailhost"/>
+
+  <adapter
+      factory=".content.CSVAwareFileAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemExporter"
+      for="Products.GenericSetup.interfaces.ICSVAware"
+      />
+
+  <adapter
+      factory=".content.CSVAwareFileAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemImporter"
+      for="Products.GenericSetup.interfaces.ICSVAware"
+      />
+
+  <adapter
+      factory=".content.INIAwareFileAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemExporter"
+      for="Products.GenericSetup.interfaces.IINIAware"
+      />
+
+  <adapter
+      factory=".content.INIAwareFileAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemImporter"
+      for="Products.GenericSetup.interfaces.IINIAware"
+      />
+
+  <adapter
+      factory=".content.DAVAwareFileAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemExporter"
+      for="Products.GenericSetup.interfaces.IDAVAware"
+      />
+
+  <adapter
+      factory=".content.DAVAwareFileAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemImporter"
+      for="Products.GenericSetup.interfaces.IDAVAware"
+      />
+
+  <adapter
+      factory=".components.ComponentRegistryXMLAdapter"
+      />
+
+  <genericsetup:exportStep
+      name="step_registries"
+      title="Step Registries"
+      description="Export current contents of import step registry and export step registry."
+      handler="Products.GenericSetup.tool.exportStepRegistries"
+      />
+
+  <genericsetup:importStep
+      name="toolset"
+      title="Required Tools"
+      description="Create required tools, replacing any of the wrong class, and remove forbidden ones."
+      handler="Products.GenericSetup.tool.importToolset"
+      />
+
+  <genericsetup:exportStep
+      name="toolset"
+      title="Required Tools"
+      description="Export required / forbidden tools."
+      handler="Products.GenericSetup.tool.exportToolset"
+      />
+
+  <genericsetup:importStep
+      name="rolemap"
+      title="Role / Permission Map"
+      description="Import custom roles and non-default role-permission mappings."
+      handler="Products.GenericSetup.rolemap.importRolemap"
+      />
+
+  <genericsetup:exportStep
+      name="rolemap"
+      title="Role / Permission Map"
+      description="Export custom roles and non-default role-permission mappings."
+      handler="Products.GenericSetup.rolemap.exportRolemap"
+      />
+
+  <genericsetup:importStep
+      name="componentregistry"
+      title="Local Component Registry"
+      description="Import local component registry configuration."
+      handler="Products.GenericSetup.components.importComponentRegistry">
+    <depends name="toolset"/>
+  </genericsetup:importStep>
+
+  <genericsetup:exportStep
+      name="componentregistry"
+      title="Local Component Registry"
+      description="Export local component registry configuration."
+      handler="Products.GenericSetup.components.exportComponentRegistry"
+      />
+
+  <subscriber handler=".events.handleProfileImportedEvent"/>
+
+</configure>

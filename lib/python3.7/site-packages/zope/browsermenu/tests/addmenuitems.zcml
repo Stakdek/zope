@@ -1,0 +1,23 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="zope">
+
+  <view
+      for="zope.browser.interfaces.IAdding"
+      type="zope.browsermenu.tests.test_addMenuItem.ILayerStub"
+      name="add2.html"
+      factory="zope.publisher.browser.BrowserPage"
+      permission="zope.Public"
+      allowed_interface="zope.publisher.interfaces.browser.IBrowserPage"
+      />
+
+  <browser:addMenuItem
+      class=".tests.test_menudirectives.I1"
+      title="Add menu Item"
+      view="add2.html"
+      permission="zope.Public" 
+      layer="zope.browsermenu.tests.test_addMenuItem.ILayerStub"
+      />
+
+</configure>

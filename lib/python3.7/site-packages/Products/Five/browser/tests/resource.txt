@@ -1,0 +1,76 @@
+Testing resources
+=================
+
+Set up the test fixtures:
+
+  >>> import Products.Five.browser.tests
+  >>> from Zope2.App import zcml
+  >>> zcml.load_config("configure.zcml", Products.Five)
+  >>> zcml.load_config('resource.zcml', package=Products.Five.browser.tests)
+
+  >>> from Products.Five.tests.testing import manage_addFiveTraversableFolder
+  >>> manage_addFiveTraversableFolder(self.folder, 'testoid', 'Testoid')
+
+  >>> import os, glob
+  >>> _prefix = os.path.dirname(Products.Five.browser.tests.__file__)
+  >>> dir_resource_names = [os.path.basename(r) for r in (
+  ...     glob.glob('%s/*.png' % _prefix) +
+  ...     glob.glob('%s/*.pt' % _prefix) +
+  ...     glob.glob('%s/[a-z]*.py' % _prefix) +
+  ...     glob.glob('%s/*.css' % _prefix))]
+
+
+Resource types
+--------------
+
+  >>> from Products.Five.browser.resource import Resource, PageTemplateResource
+
+Template resource
+~~~~~~~~~~~~~~~~~
+
+  >>> resource = self.folder.unrestrictedTraverse('testoid/++resource++cockatiel.html')
+  >>> isinstance(resource, Resource)
+  True
+  >>> resource()
+  'http://nohost/test_folder_1_/testoid/++resource++cockatiel.html'
+
+File resource
+~~~~~~~~~~~~~
+
+  >>> resource = self.folder.unrestrictedTraverse('testoid/++resource++style.css')
+  >>> isinstance(resource, Resource)
+  True
+  >>> resource()
+  'http://nohost/test_folder_1_/testoid/++resource++style.css'
+
+Image resource
+~~~~~~~~~~~~~~
+
+  >>> resource = self.folder.unrestrictedTraverse('testoid/++resource++pattern.png')
+  >>> isinstance(resource, Resource)
+  True
+  >>> resource()
+  'http://nohost/test_folder_1_/testoid/++resource++pattern.png'
+
+Resource directory
+~~~~~~~~~~~~~~~~~~
+
+  >>> base = 'testoid/++resource++fivetest_resources/%s'
+  >>> base_url = 'http://nohost/test_folder_1_/' + base
+  >>> abs_url = self.folder.unrestrictedTraverse(base % '')()
+  >>> abs_url + '/' == base_url % ''
+  True
+
+PageTemplateResource's __call__ renders the template
+
+  >>> for r in dir_resource_names:
+  ...     resource = self.folder.unrestrictedTraverse(base % r)
+  ...     self.assertIsInstance(resource, Resource)
+  ...     if not isinstance(resource, PageTemplateResource):
+  ...         self.assertEqual(resource(), base_url % r)
+
+Clean up
+--------
+
+  >>> from zope.component.testing import tearDown
+  >>> tearDown()

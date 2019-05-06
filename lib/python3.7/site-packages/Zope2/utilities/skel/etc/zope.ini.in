@@ -1,0 +1,36 @@
+[app:zope]
+use = egg:Zope#main
+zope_conf = %(here)s/wsgi.conf
+
+[pipeline:main]
+pipeline =
+    egg:Zope#httpexceptions
+    zope
+
+[server:main]
+use = egg:waitress#main
+host = 127.0.0.1
+port = 8080
+
+[loggers]
+keys = root
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARN
+handlers = console
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(asctime)s - %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %Y-%m-%d %H:%M:%S

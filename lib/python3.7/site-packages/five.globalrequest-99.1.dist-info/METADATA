@@ -1,0 +1,46 @@
+Metadata-Version: 2.0
+Name: five.globalrequest
+Version: 99.1
+Summary: DEPRECATED: Zope integration for zope.globalrequest
+Home-page: https://github.com/zopefoundation/five.globalrequest
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL
+Keywords: zope global request
+Platform: UNKNOWN
+Classifier: Framework :: Plone
+Classifier: Programming Language :: Python
+Classifier: Development Status :: 7 - Inactive
+Requires-Dist: setuptools
+Requires-Dist: Zope2 (>=4.0a3)
+
+Overview
+========
+
+This package is deprecated. It was integrated into Zope at version 4.0a3.
+It is no longer needed.
+
+Changelog
+=========
+
+99.1 (2017-06-08)
+-----------------
+
+- Fixed wrong dependency in install requires.
+
+99.0 (2017-06-01)
+-----------------
+
+- Mark as deprecated.
+
+1.0 - 2010-08-06
+----------------
+
+- Changes not recorded.
+
+1.0a2 - 2010-01-08
+------------------
+
+- Initial release
+
+

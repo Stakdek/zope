@@ -1,0 +1,65 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+  <include file="meta.zcml" package="zope.component" />
+
+  <view
+      for="*"
+      name="absolute_url"
+      factory=".AbsoluteURL"
+      type="zope.publisher.interfaces.http.IHTTPRequest"
+      permission="zope.Public"
+      allowed_interface=".interfaces.IAbsoluteURL"
+      />
+
+  <view
+      for="*"
+      factory=".AbsoluteURL"
+      type="zope.publisher.interfaces.http.IHTTPRequest"
+      permission="zope.Public"
+      provides=".interfaces.IAbsoluteURL"
+      />
+
+  <view
+      for="zope.location.interfaces.IRoot"
+      name="absolute_url"
+      factory=".SiteAbsoluteURL"
+      type="zope.publisher.interfaces.http.IHTTPRequest"
+      permission="zope.Public"
+      allowed_interface=".interfaces.IAbsoluteURL"
+      />
+
+  <view
+      for="zope.location.interfaces.IRoot"
+      factory=".SiteAbsoluteURL"
+      type="zope.publisher.interfaces.http.IHTTPRequest"
+      permission="zope.Public"
+      provides=".interfaces.IAbsoluteURL"
+      />
+
+  <view
+      for="*"
+      name="absolute_url"
+      factory=".AbsoluteURL"
+      type="zope.publisher.interfaces.browser.IDefaultBrowserLayer"
+      permission="zope.Public"
+      />
+
+  <class class=".AbsoluteURL">
+    <allow interface=".interfaces.IAbsoluteURL" />
+  </class>
+
+  <view
+      for="zope.location.interfaces.IRoot"
+      name="absolute_url"
+      factory=".SiteAbsoluteURL"
+      type="zope.publisher.interfaces.browser.IDefaultBrowserLayer"
+      permission="zope.Public"
+      />
+
+  <class class=".SiteAbsoluteURL">
+    <allow interface=".interfaces.IAbsoluteURL" />
+  </class>
+
+</configure>

@@ -1,0 +1,53 @@
+<configure xmlns:meta="http://namespaces.zope.org/meta">
+
+  <meta:directives namespace="http://namespaces.zope.org/browser">
+
+    <meta:directive
+        name="page"
+        schema=".metadirectives.IPageDirective"
+        handler=".metaconfigure.page"
+        />
+
+    <meta:complexDirective
+        name="pages"
+        schema=".metadirectives.IPagesDirective"
+        handler=".metaconfigure.pages"
+        >
+
+      <meta:subdirective
+          name="page"
+          schema=".metadirectives.IPagesPageSubdirective"
+          />
+
+    </meta:complexDirective>
+
+    <meta:complexDirective
+        name="view"
+        schema=".metadirectives.IViewDirective"
+        handler=".metaconfigure.view"
+        >
+
+      <meta:subdirective
+          name="page"
+          schema=".metadirectives.IViewPageSubdirective"
+          />
+
+      <meta:subdirective
+          name="defaultPage"
+          schema=".metadirectives.IViewDefaultPageSubdirective"
+          />
+
+    </meta:complexDirective>
+
+  </meta:directives>
+
+  <meta:directives namespace="http://namespaces.zope.org/tales">
+
+    <meta:directive name="expressiontype"
+        schema=".metadirectives.IExpressionTypeDirective"
+        handler=".metaconfigure.expressiontype"
+        />
+
+  </meta:directives>
+
+</configure>

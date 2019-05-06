@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<tool-setup xmlns:tal="http://xml.zope.org/namespaces/tal"><tal:case 
+tal:condition="context/listForbiddenTools">
+ <forbidden tool_id="TOOL_ID"
+tal:repeat="id context/listForbiddenTools"
+tal:attributes="tool_id id"/></tal:case>
+ <required tool_id="TOOL_ID"
+class="dotted.name.of.tool.class"
+tal:repeat="info context/listRequiredToolInfo"
+tal:attributes="tool_id info/id;
+                class info/class"/>
+</tool-setup>

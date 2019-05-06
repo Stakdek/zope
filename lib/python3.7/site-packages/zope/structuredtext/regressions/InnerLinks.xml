@@ -1,0 +1,20 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
+<book>
+<title>This is the InnerLinkTest</title>
+<section>
+<title>This is the InnerLinkTest</title>
+<para>
+
+see also <ulink href="#ref1">[1]</ulink>and <ulink href="#ref2">[2]</ulink></para>
+
+<para>
+
+<anchor id="ref1"/>[1]"Zope Book" by Amos Lattmeier and Michel Pelletier</para>
+
+<para>
+
+<anchor id="ref2"/>[2]"Python Book" by Guido van Rossum</para>
+
+
+</section>
+</book>

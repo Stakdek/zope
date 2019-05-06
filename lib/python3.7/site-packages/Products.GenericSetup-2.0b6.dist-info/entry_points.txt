@@ -1,0 +1,4 @@
+
+    [zope2.initialize]
+    Products.GenericSetup = Products.GenericSetup:initialize
+    

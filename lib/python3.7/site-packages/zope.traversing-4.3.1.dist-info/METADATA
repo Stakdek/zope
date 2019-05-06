@@ -1,0 +1,397 @@
+Metadata-Version: 2.1
+Name: zope.traversing
+Version: 4.3.1
+Summary: Resolving paths in the object hierarchy
+Home-page: https://github.com/zopefoundation/zope.traversing
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Keywords: zope traversal route URL view
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Software Development
+Provides-Extra: docs
+Provides-Extra: test
+Requires-Dist: setuptools
+Requires-Dist: six
+Requires-Dist: transaction
+Requires-Dist: zope.component
+Requires-Dist: zope.i18n
+Requires-Dist: zope.i18nmessageid
+Requires-Dist: zope.interface (>=4.0.4)
+Requires-Dist: zope.location (>=3.7.0)
+Requires-Dist: zope.proxy
+Requires-Dist: zope.publisher
+Requires-Dist: zope.security
+Provides-Extra: docs
+Requires-Dist: Sphinx; extra == 'docs'
+Requires-Dist: repoze.sphinx.autointerface; extra == 'docs'
+Provides-Extra: test
+Requires-Dist: zope.annotation; extra == 'test'
+Requires-Dist: zope.browserresource[zcml] (>=3.12); extra == 'test'
+Requires-Dist: zope.component[zcml]; extra == 'test'
+Requires-Dist: zope.configuration; extra == 'test'
+Requires-Dist: zope.security[zcml] (>=3.8); extra == 'test'
+Requires-Dist: zope.tales; extra == 'test'
+Requires-Dist: zope.testing; extra == 'test'
+Requires-Dist: zope.testrunner; extra == 'test'
+
+=================
+ zope.traversing
+=================
+
+.. image:: https://img.shields.io/pypi/v/zope.traversing.svg
+        :target: https://pypi.python.org/pypi/zope.traversing/
+        :alt: Latest release
+
+.. image:: https://img.shields.io/pypi/pyversions/zope.traversing.svg
+        :target: https://pypi.org/project/zope.traversing/
+        :alt: Supported Python versions
+
+.. image:: https://travis-ci.org/zopefoundation/zope.traversing.svg?branch=master
+        :target: https://travis-ci.org/zopefoundation/zope.traversing
+
+.. image:: https://coveralls.io/repos/github/zopefoundation/zope.traversing/badge.svg?branch=master
+        :target: https://coveralls.io/github/zopefoundation/zope.traversing?branch=master
+
+.. image:: https://readthedocs.org/projects/zopetraversing/badge/?version=latest
+        :target: https://zopetraversing.readthedocs.io/en/latest/
+        :alt: Documentation Status
+
+This package provides adapters for resolving object paths by traversing
+an object hierarchy.  This package also includes support for traversal
+namespaces (e.g. ``++view++``, ``++skin++``, etc.) as well as computing
+URLs via the ``@@absolute_url`` view.
+
+Documentation is hosted at https://zopetraversing.readthedocs.io/
+
+
+=========
+ Changes
+=========
+
+4.3.1 (2018-10-16)
+==================
+
+- Fix DeprecationWarnings for ``ComponentLookupError`` by
+  importing them from ``zope.interface.interfaces``. See `issue 10
+  <https://github.com/zopefoundation/zope.traversing/issues/10>`_.
+
+
+4.3 (2018-10-05)
+================
+
+- Add support for Python 3.7.
+
+- Host documentation at https://zopetraversing.readthedocs.io
+
+4.2.0 (2017-09-23)
+==================
+
+- Add support for Python 3.6.
+
+- Drop support for Python 3.3.
+
+- Drop support for ``python setup.py test``.
+
+4.1.0 (2016-08-05)
+==================
+
+- Add support for Python 3.5.
+
+- Drop support for Python 2.6.
+
+- Gracefully handle ``UnicodeEncodeError`` that can be produced when
+  doing attribute lookup on Python 2 by instead raising a ``LocationError``.
+
+4.0.0 (2014-03-21)
+==================
+
+- Add support for Python 3.4.
+
+
+4.0.0a3 (2013-03-12)
+====================
+
+- Add support for PyPy.
+
+
+4.0.0a2 (2013-02-21)
+====================
+
+- Remove ``zope.container`` testing dependency to break another circular
+  dependency.
+
+- Remove ``zope.pagetemplate`` testing dependency to break another circular
+  dependency.
+
+- Remove ``zope.browserpage`` (ZCML) dependency by using low-level directives.
+
+- Remove ``zope.site`` testing dependency.
+
+
+4.0.0a1 (2013-02-20)
+====================
+
+- Replace deprecated ``zope.component.adapts`` usage with equivalent
+  ``zope.component.adapter`` decorator.
+
+- Replace deprecated ``zope.interface.implements`` usage with equivalent
+  ``zope.interface.implementer`` decorator.
+
+- Drop support for Python 2.4 and 2.5.
+
+- Add support for Python 3.3.
+
+- Fix dependencies : removed ``zope.tal`` and added ``zope.browserpage``.
+
+
+3.14.0 (2011-03-02)
+===================
+
+- Re-release of 3.13.1 as a feature version as it introduces dependencies on
+  new feature releases.
+
+3.13.1 (2010-12-14)
+===================
+
+- Fix ZCML-related dependencies.
+
+3.13 (2010-07-09)
+=================
+
+- When a ``__parent__`` attribute is available on an object, it is
+  always used for absolute URL construction, and no ILocation adapter
+  lookup is performed for it. This was the previous behavior but was
+  broken (around 3.5?) due to dependency refactoring.
+
+  If the object provides no ``__parent__`` then an ILocation adapter
+  lookup will be performed. This will always succeed as zope.location
+  provides a default LocationProxy for everything, but more specific
+  ILocation adapters can also be provided.
+
+3.12.1 (2010-04-30)
+===================
+
+- Remove use of ``zope.testing.doctestunit`` in favor of stdlib's doctest.
+
+3.12.0 (2009-12-29)
+===================
+
+- Avoid testing dependencies on ``zope.securitypolicies`` and
+  ``zope.principalregistry``.
+
+3.11.0 (2009-12-27)
+===================
+
+- Remove testing dependency on ``zope.app.publication``.
+
+3.10.0 (2009-12-16)
+===================
+
+- Remove stray test claiming a no longer existing dependency on
+  ``zope.app.applicationcontrol``.
+
+- Refactor functional tests to loose dependency on both
+  ``zope.app.appsetup`` and ``zope.app.testing``.
+
+- Simplify tests for the ``browser`` sub-package by using ``PlacelessSetup``
+  from ``zope.component.testing`` instead of ``zope.app.testing``.
+
+- Simplify ``test_dependencies`` module by using ``zope.configuration``
+  instead of ``zope.app.testing.functional``.
+
+- Remove testing dependency on ``zope.app.publisher``.
+
+- Replace testing dependency on ``zope.app.security`` with
+  ``zope.securitypolicy``.
+
+- Remove testing dependency on ``zope.app.zcmlfiles`` in favor of more
+  explicit dependencies.
+
+- Remove testing dependency on ``zope.app.component``.
+
+- Replace a test dependency on ``zope.app.zptpage`` with a dependency on
+  ``zope.pagetemplate``.
+
+3.9.0 (2009-12-15)
+==================
+
+- Move ``IBeforeTraverseEvent`` here from ``zope.app.publication``,
+  as we already deal with publication traversal.
+
+3.8.0 (2009-09-29)
+==================
+
+- In ``zope.traversing.api.getParent()``, try to delegate to
+  ``zope.location.interfaces.ILocationInfo.getParent()``, analogous to
+  ``getParents()``. Keep returning the traversal parent as a fallback.
+
+- Bring ``ITraverser`` back from ``zope.location`` where it had been moved
+  to invert the package interdependency, but where it is now no longer used.
+
+3.7.2 (2009-08-29)
+==================
+
+- Make virtual hosting tests compatible with ``zope.publisher`` 3.9.
+  Redirecting to a different host requires an explicit ``trusted``
+  redirect now.
+
+3.7.1 (2009-06-16)
+==================
+
+- ``AbsoluteURL`` now implements the fact that ``__call__`` returns the same
+  as ``__str__`` in a manner that it applies for subclasses, too, so they only
+  have to override ``__str__`` and not both.
+
+3.7.0 (2009-05-23)
+==================
+
+- Move the ``publicationtraverse`` module to ``zope.traversing``, removing the
+  ``zope.app.publisher`` -> ``zope.app.publication`` dependency (which was a
+  cycle).
+
+- Look up the application controller through a utility registration
+  rather than a direct reference.
+
+3.6.0 (2009-04-06)
+==================
+
+- Change ``configure.zcml`` not to depend on ``zope.app.component``.
+
+- This release includes the BBB-incompatible ``zope.publisher.skinnable``
+  change from 3.5.3.
+
+3.5.4 (2009-04-06)
+==================
+
+- Revert BBB-incompatible use of ``zope.publisher.skinnable``:  that
+  change belongs in a 3.6.0 release, because it requires a BBB-incompatible
+  version of ``zope.publisher``.
+
+3.5.3 (2009-03-10)
+==================
+
+- Use applySkin from new location. zope.publisher.skinnable instead of
+  zope.publisher.browser.
+
+- Use IAbsoluteURL lookup instead of the "absolute_url" view in the
+  recursive AbsoluteURL adapters (LP: #338101).
+
+3.5.2 (2009-02-04)
+==================
+
+- ``RootPhysicallyLocatable`` is not the same as
+  ``LocationPhysicallyLocatable`` (now in ``zope.location``).
+  Fix the import and testing setups.
+
+3.5.1 (2009-02-02)
+==================
+
+- Obsolete the ``RootPhysicallyLocatable`` adapter, which has been superseded
+  by the refactored ``zope.location.traversing.LocationPhysicallyLocatable``
+  that we depend on since 3.5.0a4.
+
+  Remove the adapter and its registration, and making its import place
+  pointing to ``zope.location.traversing.LocationPhysicallyLocatable``
+  to maintain backward-compatibility.
+
+  This also fixes a bug introduced in version 3.5.0a4 when trying to
+  call ``getParents`` function for the root object.
+
+- Use direct imports instead of compatibility ones for things that were
+  moved to ``zope.location``.
+
+- Remove the ``zope.traversing.interfaces.INamespaceHandler`` interface,
+  as it seems not to be used for years.
+
+- Change package's mailing list address to zope-dev at zope.org instead
+  of retired zope3-dev at zope.org
+
+3.5.0 (2009-01-31)
+==================
+
+- Use zope.container instead of ``zope.app.container``.
+
+- Use zope.site instead of ``zope.app.folder`` in the unit tests.
+
+- Reduce, but not eliminate, test dependencies on ``zope.app.component``.
+
+3.5.0a4 (2008-08-01)
+====================
+
+- Reverse dependencies between ``zope.location`` and ``zope.traversing``.
+
+- Update (test) dependencies and tests to expect and work with a spec
+  compliant TAL interpreter as available in ``zope.tal`` >= 3.5.0.
+
+- Fix deprecation warning caused by using an old module name for
+  ``ZopeSecurityPolicy`` in ``ftesting.zcml``.
+
+- Ensure traversing doesn't raise an TypeError but a TraversalError when the
+  traversal step before yielded a string.
+
+
+3.5.0a3 (2007-12-28)
+====================
+
+- Back out the controversial ``++skin++`` traverser for XML-RPC.
+
+
+3.5.0a2 (2007-11-28)
+====================
+
+- Port 3.4.1a1 to trunk
+
+  - Do not use unicode strings to set the application server in the virtual
+    host namespace. This caused ``absolute_url`` to create unicode URL's.
+
+- Add a traverer for ``++skin++`` for XMLRPC skins (``IXMLRPCSkinType``).
+  This also means that the normal ``++skin++`` namespace handler is only
+  bound to ``IBrowserRequest``.
+
+- Resolve the dependency on ``zope.app.applicationcontrol`` by importing the
+  application controller only if the package is available.
+
+
+3.4.1 (2008-07-30)
+==================
+
+- Fix deprecation warning caused by using an old module name for
+  ``ZopeSecurityPolicy`` in ``ftesting.zcml``.
+
+
+3.4.1a1 (2007-11-13)
+====================
+
+- Do not use unicode strings to set the application server in the virtual
+  host namespace. This caused absolute_url to create unicode URL's.
+
+
+3.4.0 (2007-09-29)
+==================
+
+No further changes since 3.4.0a1.
+
+3.4.0a1 (2007-04-22)
+====================
+
+Initial release as a separate project, corresponds to ``zope.traversing``
+from Zope 3.4.0a1
+
+

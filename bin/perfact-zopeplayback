@@ -1,0 +1,6 @@
+#!/home/dennis/REPOS/zope/bin/python3.7
+# EASY-INSTALL-DEV-SCRIPT: 'perfact-zodbsync==3.11.0','perfact-zopeplayback'
+__requires__ = 'perfact-zodbsync==3.11.0'
+__import__('pkg_resources').require('perfact-zodbsync==3.11.0')
+__file__ = '/home/dennis/REPOS/zope/custom-products/perfact-zodbsync/bin/perfact-zopeplayback'
+exec(compile(open(__file__).read(), __file__, 'exec'))

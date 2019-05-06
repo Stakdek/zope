@@ -1,0 +1,4 @@
+<form>
+  <input type="input" tal:attributes="checked False" />
+  <input type="input" tal:attributes="checked True" />
+</form>

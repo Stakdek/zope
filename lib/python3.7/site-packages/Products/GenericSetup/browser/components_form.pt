@@ -1,0 +1,13 @@
+<div tal:content="view/status" />
+
+<form action="." method="post"
+      tal:attributes="action request/ACTUAL_URL">
+
+  <textarea name="body" cols="60" rows="24" style="width: 600px;"
+            tal:content="view/adapter/body"></textarea>
+
+  <div>
+    <input type="submit" name="apply" value="Apply" />
+  </div>
+
+</form>

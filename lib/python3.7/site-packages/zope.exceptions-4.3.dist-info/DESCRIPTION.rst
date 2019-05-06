@@ -1,0 +1,248 @@
+=================
+ zope.exceptions
+=================
+
+.. image:: https://img.shields.io/pypi/v/zope.exceptions.svg
+        :target: https://pypi.python.org/pypi/zope.exceptions/
+        :alt: Latest release
+
+.. image:: https://img.shields.io/pypi/pyversions/zope.exceptions.svg
+        :target: https://pypi.org/project/zope.exceptions/
+        :alt: Supported Python versions
+
+.. image:: https://travis-ci.org/zopefoundation/zope.exceptions.svg?branch=master
+        :target: https://travis-ci.org/zopefoundation/zope.exceptions
+
+.. image:: https://coveralls.io/repos/github/zopefoundation/zope.exceptions/badge.svg?branch=master
+        :target: https://coveralls.io/github/zopefoundation/zope.exceptions?branch=master
+
+.. image:: https://readthedocs.org/projects/zopeexceptions/badge/?version=latest
+        :target: https://zopeexceptions.readthedocs.io/en/latest/
+        :alt: Documentation Status
+
+This package contains exception exceptions and implementations which are so
+general purpose that they don't belong in Zope application-specific packages.
+
+Please see https://zopeexceptions.readthedocs.io/ for the documentation.
+
+
+===========================
+ zope.exceptions Changelog
+===========================
+
+4.3 (2018-10-04)
+================
+
+- Add support for Python 3.7.
+
+
+4.2.0 (2017-09-12)
+==================
+
+- Add support for Python 3.6.
+
+- Drop support for Python 3.3.
+
+- Fix handling of unicode supplemental traceback information on
+  Python 2. Now such values are always encoded to UTF-8; previously
+  the results were undefined and depended on system encodings and the
+  values themselves. See `issue 1 <https://github.com/zopefoundation/zope.exceptions/issues/1>`_.
+
+4.1.0 (2017-04-12)
+==================
+
+- Drop support for Python 2.6 and 3.2.
+
+- Make ``exceptionformatter.extract_stack`` signature comply with
+  ``traceback.extract_stack``
+
+- Add support for Python 3.5.
+
+4.0.8 (2015-08-13)
+==================
+
+- Fixes around ``TextExceptionFormatter`` ``limit``: ``formatException``
+  and ``extractStack`` was cutting the traceback at the bottom,
+  at the most interesting point. Now it will cut from the middle.
+  Some text about the missing entries will be inserted.
+
+- Maybe fix for ``extractStack``, it did not detect recursions in the frames.
+
+4.0.7 (2014-03-19)
+==================
+
+- Added explicit support for Python 3.4.
+
+- Updated ``boostrap.py`` to version 2.2.
+
+
+4.0.6 (2013-02-28)
+==================
+
+- Make sure that ``setup.py`` finds all tests. Now tox runs them all as well.
+
+- Fix failing test under Python 3.
+
+- Made buildout work under Python 3 and Buildout 2.
+
+
+4.0.5 (2012-12-31)
+==================
+
+- Fleshed out PyPI Trove classifiers.
+
+- Fixed a test failure under Python 2.6.
+
+
+4.0.4 (2012-12-13)
+==================
+
+- Release with a fixed MANIFEST.in (without ``docs/``)
+
+
+4.0.3 (2012-12-10)
+==================
+
+- Fixed format_exception(..., as_html=True) not to HTML-escape the '<br />'
+  it adds to the exception value.
+
+
+4.0.2 (2012-11-21)
+==================
+
+- Test Python 3.3 support under tox.
+
+
+4.0.1 (2012-08-20)
+==================
+
+- Fixed optional dependency code for `'zope.security`` to work under Python 3.3.
+
+
+4.0.0.1 (2012-05-16)
+====================
+
+- Fixed rendering of package docs on PyPI.
+
+
+4.0.0 (2012-05-16)
+==================
+
+- Automated build of Sphinx HTML docs and running doctest snippets via tox.
+
+- Added Sphinx documentation.
+
+- Added support for continuous integration using ``tox`` and ``jenkins``.
+
+- Removed use of '2to3' and associated fixers when installing under Py3k.
+  The code is now in a "compatible subset" which supports Python 2.6, 2.7,
+  and 3.2, including PyPy 1.8 (the version compatible with the 2.7 language
+  spec).
+
+- 100% unit test coverage.
+
+- Dropped explicit support for Python 2.4 / 2.5 / 3.1.
+
+- Added 'setup.py dev' alias (runs ``setup.py develop`` plus installs
+  ``nose`` and ``coverage``).
+
+- Added 'setup.py docs' alias (installs ``Sphinx`` and dependencies).
+
+
+3.7.1 (2012-03-28)
+==================
+
+- Fix: missed to reverse extractStack entries
+
+
+3.7.0 (2012-03-28)
+==================
+
+- Added TextExceptionFormatter.extractStack and extract_stack
+
+
+3.6.2 (2012-03-28)
+==================
+
+- Fallback to traceback.format_tb when the formatter is called recursively.
+  i.e. Don't let errors in the formatter pass silently.
+
+- Fix deprecated unittest functions: ``assert_`` and ``assertEquals``.
+
+3.6.1 (2010-07-06)
+==================
+
+- Fixed tests to work under Python 2.7.
+
+- PEP8 cleanup and removed obsolete build infrastructure files.
+
+
+3.6.0 (2010-05-02)
+==================
+
+- Added support to bootstrap on Jython.
+
+- Added Python 3 support.
+
+- The dependency on zope.testing seemed spurious, possibly a rest of a real
+  dependency that is gone now. I removed it.
+
+
+3.5.2 (2008-04-30)
+==================
+
+- Updated CHANGES.txt.
+
+
+3.5.1 (2008-04-28)
+==================
+
+- Reverted changes in 3.5.0.
+
+
+3.5.0
+=====
+
+- Added the capability for exceptions to be formatted line-by-line.
+  Unfortunately, also introduced a bug cause each line of the exception to be
+  its own log message.
+
+
+3.4.0 (2007-10-02)
+==================
+
+- Updated package meta-data.
+
+
+3.4.0b2 (2007-08-14)
+====================
+
+- Removed superfluous dependency on ``zope.deprecation``.
+
+
+3.4.0b1 (2007-07-09)
+====================
+
+- Corresponds to the version of the ``zope.exceptions`` package shipped as
+  part of the Zope 3.4.0b1 release.
+
+
+3.2.0 (2006-01-05)
+==================
+
+- Corresponds to the version of the ``zope.exceptions`` package shipped as part of
+  the Zope 3.2.0 release.
+
+- Deprecated the ``INotFoundError`` interface and the corresponding
+  ``NotFoundError`` exception class, in favor of "standard" exceptions
+  ``AttributeError``, ``KeyError``).  The deprecated items will be removed in
+  Zope 3.3.
+
+
+3.0.0 (2004-11-07)
+==================
+
+- Corresponds to the version of the zope.exceptions package shipped as part of
+  the Zope X3.0.0 release.
+
+

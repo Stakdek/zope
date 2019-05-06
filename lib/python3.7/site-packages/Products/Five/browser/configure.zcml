@@ -1,0 +1,37 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:browser="http://namespaces.zope.org/browser">
+
+  <interface
+      interface="zope.browsermenu.interfaces.IMenuItemType"
+      />
+
+  <include package="OFS" file="absoluteurl.zcml"/>
+  <adapter factory="zope.browserresource.file.FileETag" />
+
+  <browser:view
+      for="OFS.interfaces.IObjectManager"
+      name="+"
+      class=".adding.ContentAdding"
+      permission="zope2.ViewManagementScreens"
+      >
+
+    <browser:page name="index.html"  template="adding.pt" />
+
+  </browser:view>
+
+  <adapter
+      for="OFS.interfaces.IObjectManager"
+      factory=".adding.ObjectManagerNameChooser"
+      provides="zope.container.interfaces.INameChooser"
+      />
+
+  <!-- Menu access -->
+  <browser:page
+      for="*"
+      name="view_get_menu"
+      permission="zope.Public"
+      class="zope.browsermenu.menu.MenuAccessView"
+      allowed_interface="zope.browsermenu.interfaces.IMenuAccessView"
+      />
+
+</configure>

@@ -1,0 +1,16 @@
+Package configuration
+=====================
+
+The ``zope.browserresource`` package provides a ZCML file that configures some
+adapters and views and a couple of security declarations:
+
+  >>> from zope.configuration.xmlconfig import XMLConfig
+  >>> import zope.browserresource
+
+  >>> XMLConfig('configure.zcml', zope.browserresource)()
+
+  >>> len(list(zope.component.getGlobalSiteManager().registeredUtilities()))
+  9
+
+  >>> len(list(zope.component.getGlobalSiteManager().registeredAdapters()))
+  3

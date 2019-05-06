@@ -1,0 +1,31 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <include package="zope.component" file="meta.zcml" />
+  <include package="zope.security" file="meta.zcml" />
+
+  <utility
+      name="pt"
+      component=".ptresource.PageTemplateResourceFactory"
+      provides="zope.browserresource.interfaces.IResourceFactoryFactory"
+      />
+
+  <utility
+      name="zpt"
+      component=".ptresource.PageTemplateResourceFactory"
+      provides="zope.browserresource.interfaces.IResourceFactoryFactory"
+      />
+
+  <utility
+      name="html"
+      component=".ptresource.PageTemplateResourceFactory"
+      provides="zope.browserresource.interfaces.IResourceFactoryFactory"
+      />
+
+  <class class=".ptresource.PageTemplateResource">
+    <allow
+        interface="zope.publisher.interfaces.browser.IBrowserPublisher"
+        attributes="__call__"
+        />
+  </class>
+
+</configure>

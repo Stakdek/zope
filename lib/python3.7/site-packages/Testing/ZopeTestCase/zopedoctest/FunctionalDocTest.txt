@@ -1,0 +1,200 @@
+====================
+Functional doc tests
+====================
+
+Doctests are a way to write tests while documenting the thing that is
+tested at the same time.  As an example, this file both documents
+functional doc tests *and* tests them.
+
+Doctests look like regular interactive interpreter sessions.  That
+makes them very easy to create.  Doctests can either occur in an
+object's or method's docstring or in a separate file.  Use either
+``DocTestSuite`` or ``DocFileSuite`` in these cases.
+
+
+Creating functional doctests
+----------------------------
+
+Creating functional doctests is just as easy.  Obviously, you cannot
+simply use an interpreter shell for the initial test creation.
+Instead, you can use the `tcpwatch` program to record browser sessions
+and turn them into tests:
+
+1. Start out with a clean ZODB database.
+
+   - Create a folder named `test_folder_1_` in the root folder.
+
+   - Create a user in the root user folder called `test_user_1_` with
+     the password `secret`.
+
+    - Create a role `test_role_1_` and grant the role to the test
+      user.  Grant the permissions 'Access contents information' and
+      'View' to the role.
+
+2. Install tcpwatch.  You can get a recent version from Zope CVS:
+   http://cvs.zope.org/Packages/tcpwatch/
+
+3. Create a temporary directory to record tcpwatch output.
+
+4. Run tcpwatch using:
+   tcpwatch.py -L 8081:8080 -s -r tmpdir
+   (the ports are the listening port and forwarded-to port; the
+   second port must match the Zope configuration)
+
+5. In a browser, connect to the listening port and do whatever needs
+   to be recorded.
+
+6. Shut down tcpwatch.
+
+7. Run the script at Zope/lib/python/Testing/ZopeTestCase/doctest/dochttp.py
+   python2.3 dochttp.py tmpdir > .../mytest.txt
+
+8. Edit the generated text file to add explanations and elide
+   uninteresting portions of the output.
+
+9. In a functional test module (usually ftests.py), import
+   ``FunctionalDocFileSuite`` and instantiate it, passing the name of the
+   text file containing the test.  For example:
+
+   from unittest import TestSuite
+   from Testing.ZopeTestCase import FunctionalDocFileSuite
+
+   def test_suite():
+       return TestSuite((
+           FunctionalDocFileSuite('FunctionalDocTest.txt'),
+       ))
+
+
+Examples
+--------
+
+Test Publish Document
+
+  >>> response = http(r"""
+  ... GET /test_folder_1_/index_html HTTP/1.1
+  ... """, handle_errors=False)
+
+  >>> response.status
+  200
+  >>> response.headers == {
+  ...     'content-length': '5', 'content-type': 'text/plain; charset=utf-8'}
+  True
+  >>> response.getBody() == b'index'
+  True
+
+Test parameter containing an additional '?'
+
+  >>> response = http(r"""
+  ... GET /test_folder_1_?foo=bla%3Fbaz HTTP/1.1
+  ... """)
+
+  >>> response.status
+  200
+  >>> response.headers == {
+  ...     'content-length': '5', 'content-type': 'text/plain; charset=utf-8'}
+  True
+  >>> response.getBody() == b'index'
+  True
+
+Test Unauthorized
+
+  >>> self.folder.index_html.manage_permission('View', ['Owner'])
+  >>> print(http(r"""
+  ... GET /test_folder_1_/index_html HTTP/1.1
+  ... """, handle_errors=True))
+  HTTP/1.1 401 Unauthorized
+  ...
+  Www-Authenticate: basic realm=...
+
+Test Basic Authentication
+
+  >>> from AccessControl.Permissions import manage_properties
+  >>> self.setPermissions([manage_properties])
+
+  >>> response = http(r"""
+  ... GET /test_folder_1_/index_html/change_title?title=Foo HTTP/1.1
+  ... Authorization: Basic %s
+  ... """ % user_auth, handle_errors=False)
+
+  >>> response.status
+  200
+
+  >>> self.folder.index_html.title_or_id()
+  'Foo'
+
+Test passing in non-base64-encoded login/pass
+
+  >>> from Testing.ZopeTestCase import user_name, user_password
+  >>> response = http(r"""
+  ... GET /test_folder_1_/index_html/change_title?title=Baz HTTP/1.1
+  ... Authorization: Basic %s:%s
+  ... """ % (user_name, user_password), handle_errors=False)
+
+  >>> response.status
+  200
+
+  >>> self.folder.index_html.title_or_id()
+  'Baz'
+
+Test setting cookies
+
+  >>> response = http(r"""
+  ... GET /test_folder_1_/index_html/set_cookie HTTP/1.1
+  ... """, handle_errors=False)
+
+  >>> response.status
+  200
+
+  >>> b'Set-Cookie: foo="Bar"; Path=/' in response.getOutput()
+  True
+
+Test reading cookies
+
+  >>> response = http(r"""
+  ... GET /test_folder_1_/index_html/show_cookies HTTP/1.1
+  ... Cookie: foo=bar; baz="oki doki"
+  ... """, handle_errors=False)
+
+  >>> response.status
+  200
+
+  >>> b'foo: bar' in response.getBody()
+  True
+
+  >>> b'baz: oki doki' in response.getBody()
+  True
+
+Test parsing of multipart body with unicode
+
+  >>> ni_hao = '\xe4\xbd\xa0\xe5\xa5\xbd'  # utf-8 encoded
+  >>> response = http(r"""
+  ... GET /test_folder_1_/index_html/set_cookie HTTP/1.1
+  ... Authorization: %s:%s
+  ... Content-Type: multipart/form-data; boundary=---------------------------968064918930967154199105236
+  ... Content-Length: 418
+  ...
+  ... -----------------------------968064918930967154199105236
+  ... Content-Disposition: form-data; name="field.title"
+  ...
+  ... %s
+  ... -----------------------------968064918930967154199105236
+  ... Content-Disposition: form-data; name="field.description"
+  ...
+  ... Details
+  ... -----------------------------968064918930967154199105236
+  ... Content-Disposition: form-data; name="field.somenumber"
+  ...
+  ... 0
+  ... -----------------------------968064918930967154199105236
+  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
+  ...
+  ... Add
+  ... -----------------------------968064918930967154199105236
+  ... Content-Disposition: form-data; name="add_input_name"
+  ...
+  ... unicodetest
+  ... -----------------------------968064918930967154199105236--
+  ... """ % (user_name, user_password, ni_hao))
+
+  >>> response.status
+  200

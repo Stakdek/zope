@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title tal:content="view/title">FORM TITLE</title>
+<link rel="stylesheet" type="text/css" href="manage_page_style.css"
+  tal:attributes="href string:${request/BASEPATH1}/manage_page_style.css" />
+
+</head>
+<body bgcolor="#ffffff" link="#000099" alink="#000099" vlink="#000099">
+
+<table width="100%" cellpadding="2" cellspacing="0" border="0">
+<tr class="location-bar">
+
+  <td align="left" valign="top">
+  <div class="form-title" tal:content="view/title">FORM TITLE</div></td>
+  <td align="right" valign="top">
+  <div class="std-text">
+    &nbsp;
+    </div>
+
+  </td>
+</tr>
+</table>
+
+
+
+<p class="form-help" tal:content="view/description">DESCRIPTION TEXT.</p>
+
+<form action="." method="post"
+   tal:attributes="action request/ACTUAL_URL">
+<table cellspacing="0" cellpadding="2" border="0">
+ <tr>
+  <td>
+   <div class="form-label">ID</div>
+  </td>
+  <td>
+   <input type="text" name="add_input_name" size="40" />
+  </td>
+ </tr>
+ <tr tal:condition="view/getProfileInfos">
+  <td>
+   <div class="form-label">Presettings</div>
+  </td>
+  <td>
+   <select name="settings_id">
+    <option value="" selected="selected">(None)</option>
+    <optgroup label="PROFILE_TITLE"
+       tal:repeat="profile view/getProfileInfos"
+       tal:attributes="label profile/title">
+     <option value="SETTINGS_ID"
+             tal:repeat="obj_id profile/obj_ids"
+             tal:attributes="value string:${profile/id}/${obj_id}"
+             tal:content="obj_id">OBJ ID</option></optgroup>
+   </select>
+  </td>
+ </tr>
+ <tr>
+  <td>
+   &nbsp;
+  </td>
+  <td>
+   <input class="form-element" type="submit" name="submit_add" value="Add" /> 
+  </td>
+ </tr>
+</table>
+</form>
+
+</body>
+</html>
+

@@ -1,0 +1,338 @@
+Doctests in TestCase classes
+============================
+
+The original ``doctest`` unittest integration was based on
+``unittest`` test suites, which have fallen out of favor. This module
+provides a way to define doctests inside of unittest ``TestCase``
+classes. It provides better integration with unittest test fixtures,
+because doctests use setup provided by the containing test case
+class. It provides access to unittest assertion methods.
+
+You can define doctests in multiple ways:
+
+- references to named files
+
+- strings
+
+- decorated functions with docstrings
+
+- reference to named files decorating test-specific setup functions
+
+- reference to named files decorating a test class
+
+.. some setup
+
+   >>> __name__ = 'tests'
+
+Here are some examples::
+
+    >>> from zope.testing import doctestcase
+    >>> import doctest
+    >>> import unittest
+
+    >>> g = 'global'
+
+    >>> class MyTest(unittest.TestCase):
+    ...
+    ...     def setUp(self):
+    ...         self.a = 1
+    ...         self.globs = dict(c=9)
+    ...
+    ...     test1 = doctestcase.file('test-1.txt', optionflags=doctest.ELLIPSIS)
+    ...
+    ...     test2 = doctestcase.docteststring('''
+    ...       >>> self.a, g, c
+    ...       (1, 'global', 9)
+    ...     ''')
+    ...
+    ...     @doctestcase.doctestmethod(optionflags=doctest.ELLIPSIS)
+    ...     def test3(self):
+    ...         '''
+    ...         >>> self.a, self.x, g, c
+    ...         (1, 3, 'global', 9)
+    ...         '''
+    ...         self.x = 3
+    ...
+    ...     @doctestcase.doctestfile('test4.txt')
+    ...     def test4(self):
+    ...         self.x = 5
+
+    >>> import sys
+
+    >>> @doctestcase.doctestfiles('loggingsupport.txt', 'renormalizing.txt')
+    ... class MoreTests(unittest.TestCase):
+    ...
+    ...    def setUp(self):
+    ...        def print_(*args):
+    ...            sys.stdout.write(' '.join(map(str, args))+'\n')
+    ...        self.globs = dict(print_=print_)
+
+
+.. We can run these tests with the ``unittest`` test runner.
+
+    >>> loader = unittest.TestLoader()
+    >>> sys.stdout.writeln = lambda s: sys.stdout.write(s+'\n')
+    >>> suite = loader.loadTestsFromTestCase(MyTest)
+    >>> result = suite.run(unittest.TextTestResult(sys.stdout, True, 3))
+    test1 (tests.MyTest) ... ok
+    test2 (tests.MyTest) ... ok
+    test3 (tests.MyTest) ... ok
+    test4 (tests.MyTest) ... ok
+
+    >>> suite = loader.loadTestsFromTestCase(MoreTests)
+    >>> result = suite.run(unittest.TextTestResult(sys.stdout, True, 3))
+    test_loggingsupport (tests.MoreTests) ... ok
+    test_renormalizing (tests.MoreTests) ... ok
+
+    >>> for _, e in result.errors:
+    ...     print(e); print
+
+    Check meta data:
+
+    >>> MyTest.test1.__name__
+    'test_1'
+    >>> import os, zope.testing
+    >>> (MyTest.test1.filepath ==
+    ...  os.path.join(os.path.dirname(zope.testing.__file__), 'test-1.txt'))
+    True
+    >>> MyTest.test1.filename
+    'test-1.txt'
+
+    >>> MyTest.test3.__name__
+    'test3'
+    >>> MyTest.test4.__name__
+    'test4'
+
+    >>> (MyTest.test4.filepath ==
+    ...  os.path.join(os.path.dirname(zope.testing.__file__), 'test4.txt'))
+    True
+    >>> MyTest.test4.filename
+    'test4.txt'
+
+    >>> MoreTests.test_loggingsupport.__name__
+    'test_loggingsupport'
+    >>> MoreTests.test_loggingsupport.filename
+    'loggingsupport.txt'
+    >>> (MoreTests.test_loggingsupport.filepath ==
+    ...  os.path.join(os.path.dirname(zope.testing.__file__),
+    ...               'loggingsupport.txt'))
+    True
+
+In these examples, 4 constructors were used:
+
+doctestfile (alias: file)
+  doctestfile makes a file-based test case.
+
+  This can be used as a decorator, in which case, the decorated
+  function is called before the test is run, to provide test-specific
+  setup.
+
+doctestfiles (alias: files)
+  doctestfiles makes file-based test cases and assigns them to the
+  decorated class.
+
+  Multiple files can be specified and the resulting doctests are added
+  as members of the decorated class.
+
+docteststring (alias string)
+  docteststring constructs a doctest from a string.
+
+doctestmethod (alias method)
+  doctestmethod constructs a doctest from a method.
+
+  The method's docstring provides the test. The method's body provides
+  optional test-specific setup.
+
+Note that short aliases are provided, which maye be useful in certain
+import styles.
+
+Tests have access to the following data:
+
+- Tests created with the ``docteststring`` and ``doctestmethod``
+  constructors have access to the module globals of the defining
+  module.
+
+- In tests created with the ``docteststring`` and ``doctestmethod``
+  constructors, the test case instance is available as the ``self``
+  variable.
+
+- In tests created with the ``doctestfile`` and ``doctestfiles``
+  constructor, the test case instance is available as the ``test``
+  variable.
+
+- If a test case defines a globs attribute, it must be a dictionary
+  and it's contents are added to the test globals.
+
+The constructors accept standard doctest ``optionflags`` and
+``checker`` arguments.
+
+Note that the doctest IGNORE_EXCEPTION_DETAIL option flag is
+added to optionflags.
+
+When using ``doctestfile`` and ``doctestfile``, ``filename`` and
+``filepath`` attributes are available that contain the test file name
+and full path.
+
+``__name__`` attributes of class members
+----------------------------------------
+
+Class members have ``__name__`` attributes set as follows:
+
+- When using ``doctestmethod`` or ``doctestfile`` with a setup
+  function, ``__name__`` attribute is set to the name of the function.
+  A ``test_`` prefix is added, if the name doesn't start with ``test``.
+
+- When ``doctestfile`` is used without a setup function or when
+  ``doctestfiles`` is used, ``__name__`` is set to the last part of the
+  file path with the extension removed and non-word characters
+  converted to underscores. For example, with a test path of
+  ``'/foo/bar/test-it.rst'``, the ``__name__`` attribute is set to
+  ``'test_it'``.  A ``test_`` prefix is added, if the name doesn't
+  start with ``test``.
+
+- when using ``docteststring``, a ``name`` option can be passed in to
+  set ``__name__``.  A ``test_`` prefix is added, if the name doesn't
+  start with ``test``.
+
+The ``__name__`` attribute is important when using nose, because nose
+discovers tests as class members using their ``__name__`` attributes,
+whereas the unittest and py.test test runners use class dictionary keys.
+
+.. Let's look at some failure cases:
+
+    >>> class MyTest(unittest.TestCase):
+    ...
+    ...     test2 = doctestcase.string('''
+    ...     >>> 1
+    ...     1
+    ...     >>> 1 + 1
+    ...     1
+    ...     ''', name='test2')
+    ...
+    ...     @doctestcase.method
+    ...     def test3(self):
+    ...         '''
+    ...         >>> self.x
+    ...         3
+    ...         >>> 1 + 1
+    ...         1
+    ...         '''
+    ...         self.x = 3
+    ...
+    ...     @doctestcase.file('test4f.txt')
+    ...     def test4(self):
+    ...         self.x = 5
+
+    >>> suite = loader.loadTestsFromTestCase(MyTest)
+    >>> result = suite.run(unittest.TextTestResult(sys.stdout, True, 1))
+    FFF
+    >>> for c, e in result.failures:
+    ...     print(e) # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+    Traceback (most recent call last):
+      ...
+    ...: Failed doctest test for <string>
+      File "<string>", line 0, in <string>
+    <BLANKLINE>
+    ----------------------------------------------------------------------
+    File "<string>", line 4, in <string>
+    Failed example:
+        1 + 1
+    Expected:
+        1
+    Got:
+        2
+    <BLANKLINE>
+    <BLANKLINE>
+    Traceback (most recent call last):
+      ...
+    ...: Failed doctest test for test3
+      File "None", line 10, in test3
+    <BLANKLINE>
+    ----------------------------------------------------------------------
+    Line 4, in test3
+    Failed example:
+        1 + 1
+    Expected:
+        1
+    Got:
+        2
+    <BLANKLINE>
+    <BLANKLINE>
+    Traceback (most recent call last):
+    ...
+    ...: Failed doctest test for test4f.txt
+      File "...test4f.txt", line 0, in txt
+    <BLANKLINE>
+    ----------------------------------------------------------------------
+    File "...test4f.txt", line 3, in test4f.txt
+    Failed example:
+        1 + 1
+    Expected:
+        1
+    Got:
+        2
+    <BLANKLINE>
+    <BLANKLINE>
+
+    Check string meta data:
+
+    >>> MyTest.test2.__name__
+    'test2'
+
+.. Verify setting optionflags and checker
+
+    >>> class EasyChecker:
+    ...     def check_output(self, want, got, optionflags):
+    ...         return True
+    ...     def output_difference(self, example, got, optionflags):
+    ...         return ''
+
+    >>> class MyTest(unittest.TestCase):
+    ...
+    ...     test2 = doctestcase.string('''
+    ...     >>> 1
+    ...     2
+    ...     ''', checker=EasyChecker())
+    ...
+    ...     @doctestcase.method(optionflags=doctest.ELLIPSIS)
+    ...     def test3(self):
+    ...         '''
+    ...         >>> 'Hello'
+    ...         '...'
+    ...         '''
+    ...
+    ...     @doctestcase.file('test4e.txt', optionflags=doctest.ELLIPSIS)
+    ...     def test4(self):
+    ...         self.x = 5
+
+    >>> suite = loader.loadTestsFromTestCase(MyTest)
+    >>> result = suite.run(unittest.TextTestResult(sys.stdout, True, 2))
+    test2 (tests.MyTest) ... ok
+    test3 (tests.MyTest) ... ok
+    test4 (tests.MyTest) ... ok
+
+.. test __name__ variations
+
+    >>> class MyTest(unittest.TestCase):
+    ...
+    ...     foo = doctestcase.string('''>>> 1''', name='foo')
+    ...
+    ...     @doctestcase.method
+    ...     def bar(self):
+    ...         '''
+    ...         >>> self.x
+    ...         3
+    ...         '''
+    ...     @doctestcase.file('test4f.txt')
+    ...     def baz(self):
+    ...         pass
+    ...     wait = doctestcase.file('wait.txt')
+
+    >>> MyTest.foo.__name__
+    'test_foo'
+    >>> MyTest.bar.__name__
+    'test_bar'
+    >>> MyTest.baz.__name__
+    'test_baz'
+    >>> MyTest.wait.__name__
+    'test_wait'

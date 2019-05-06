@@ -1,0 +1,3 @@
+[console_scripts]
+mkzeoinstance = zope.mkzeoinstance:main
+

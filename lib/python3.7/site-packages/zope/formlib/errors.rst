@@ -1,0 +1,73 @@
+================
+ Error handling
+================
+
+.. currentmodule:: zope.formlib.interfaces
+
+These are a couple of functional tests that were written on-the-go ... In the
+future this might become more extensive ...
+
+Displaying invalidation errors
+==============================
+
+Validation errors, e.g. cause by invariants, are converted into readable text
+by adapting them to `IWidgetInputErrorView`:
+
+    >>> from zope.publisher.browser import TestRequest
+    >>> from zope.interface.exceptions import Invalid
+    >>> from zope.component import getMultiAdapter
+    >>> from zope.formlib.interfaces import IWidgetInputErrorView
+    >>> error = Invalid("You are wrong!")
+    >>> message = getMultiAdapter((error, TestRequest()),
+    ...         IWidgetInputErrorView).snippet()
+    >>> message
+    u'<span class="error">You are wrong!</span>'
+
+Interface invariant methods raise `zope.interface.Invalid` exception. Test if
+this exception gets handled by the error_views.
+
+    >>> myError = Invalid('My error message')
+    >>> import zope.formlib.form
+    >>> mybase = zope.formlib.form.FormBase(None, TestRequest())
+    >>> mybase.errors = (myError,)
+    >>> save = mybase.error_views()
+    >>> next(save)
+    u'<span class="error">My error message</span>'
+
+Now we need to set up the translation framework:
+
+    >>> from zope import component, interface
+    >>> from zope.i18n.interfaces import INegotiator
+    >>> @interface.implementer(INegotiator)
+    ... class Negotiator:
+    ...     def getLanguage(*ignored): return 'test'
+    >>> component.provideUtility(Negotiator())
+    >>> from zope.i18n.testmessagecatalog import TestMessageFallbackDomain
+    >>> component.provideUtility(TestMessageFallbackDomain)
+
+And yes, we can even handle an i18n message in an Invalid exception:
+
+    >>> from zope.i18nmessageid import MessageFactory
+    >>> _ = MessageFactory('my.domain')
+    >>> myError = Invalid(_('My i18n error message'))
+    >>> mybase = zope.formlib.form.FormBase(None, TestRequest())
+    >>> mybase.errors = (myError,)
+    >>> save = mybase.error_views()
+    >>> next(save)
+    u'<span class="error">[[my.domain][My i18n error message]]</span>'
+
+Displaying widget input errors
+==============================
+
+`WidgetInputError` exceptions also work with i18n messages:
+
+    >>> from zope.formlib.interfaces import WidgetInputError
+    >>> myError = WidgetInputError(
+    ...     field_name='summary',
+    ...     widget_title=_(u'Summary'),
+    ...     errors=_(u'Foo'))
+    >>> mybase = zope.formlib.form.FormBase(None, TestRequest())
+    >>> mybase.errors = (myError,)
+    >>> save = mybase.error_views()
+    >>> next(save)
+    u'[[my.domain][Summary]]: <span class="error">[[my.domain][Foo]]</span>'

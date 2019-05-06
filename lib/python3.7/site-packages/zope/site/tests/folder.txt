@@ -1,0 +1,58 @@
+===============================
+File representation for Folders
+===============================
+
+Folders can be represented in file-system-like protocols (e.g. FTP). An
+adapter abstracts some internals away and adds support for accessing the
+'++etc++site' folder from those protocols.
+
+  >>> from zope.site.folder import rootFolder
+  >>> from zope.container.directory import ReadDirectory
+  >>> folder = rootFolder()
+  >>> from zope.site.site import LocalSiteManager
+  >>> folder.setSiteManager(LocalSiteManager(folder))
+  >>> fs_folder = ReadDirectory(folder)
+
+As the root folder is a site, the ++etc++site object appears:
+
+  >>> fs_folder.keys()
+  ['++etc++site']
+  >>> fs_folder.get('++etc++site')
+  <LocalSiteManager ++etc++site>
+  >>> fs_folder['++etc++site']
+  <LocalSiteManager ++etc++site>
+  >>> list(fs_folder.__iter__())
+  ['++etc++site']
+  >>> list(fs_folder.values())
+  [<LocalSiteManager ++etc++site>]
+  >>> len(fs_folder)
+  1
+  >>> list(fs_folder.items())
+  [('++etc++site', <LocalSiteManager ++etc++site>)]
+  >>> '++etc++site' in fs_folder
+  True
+
+Let's add another folder to see how a non-site folder behaves:
+
+  >>> from zope.site.folder import Folder
+  >>> folder['test'] = Folder()
+
+The site folder now contains the new folder:
+
+  >>> list(fs_folder.keys())
+  [u'test', '++etc++site']
+  >>> fs_folder.get('test')
+  <...Folder object at 0x...>
+  >>> fs_folder['test']
+  <...Folder object at 0x...>
+  >>> list(fs_folder.__iter__())
+  [u'test', '++etc++site']
+  >>> list(fs_folder.values())
+  [...Folder object at 0x...>, <LocalSiteManager ++etc++site>]
+  >>> len(fs_folder)
+  2
+  >>> list(fs_folder.items())
+  [(u'test', ...Folder object at 0x...>),
+   ('++etc++site', <LocalSiteManager ++etc++site>)]
+  >>> 'test' in fs_folder
+  True

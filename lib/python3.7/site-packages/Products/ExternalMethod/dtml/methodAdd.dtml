@@ -1,0 +1,54 @@
+<dtml-var manage_page_header>
+
+<main class="container-fluid">
+
+	<dtml-var "manage_form_title(this(), _, form_title='Add External Method')">
+	
+	<p class="form-help">
+		External Methods allow you to add functionality to Zope by writing Python
+		functions which are exposed as callable Zope objects. The <em>module name</em> 
+		should give the name of the Python module without the &quot;.py&quot; 
+		file extension. The <em>function name</em> should name a callable object 
+		found in the module.
+	</p>
+
+	<form action="manage_addExternalMethod" method="post" class="zmi-add zmi-externalmethod">
+		
+		<div class="form-group row">
+			<label for="id" class="form-label col-sm-3 col-md-2">Id</label>
+			<div class="col-sm-9 col-md-10">
+				<input id="id" class="form-control" type="text" name="id" />
+			</div>
+		</div>
+		
+		<div class="form-group row ">
+			<label for="title" class="form-label col-sm-3 col-md-2">Title</label>
+			<div class="col-sm-9 col-md-10">
+				<input id="title" class="form-control" type="text" name="title" />
+			</div>
+		</div>
+		
+		<div class="form-group row ">
+			<label for="title" class="form-label col-sm-3 col-md-2">Module Name</label>
+			<div class="col-sm-9 col-md-10">
+				<input id="module" class="form-control" type="text" name="module" />
+			</div>
+		</div>
+		
+		<div class="form-group row ">
+			<label for="title" class="form-label col-sm-3 col-md-2">Function Name</label>
+			<div class="col-sm-9 col-md-10">
+				<input id="function" class="form-control" type="text" name="function" />
+			</div>
+		</div>
+		
+		
+		<div class="zmi-controls">
+			<input class="btn btn-primary" type="submit" name="submit" value="Add" />
+		</div>
+
+	</form>
+
+</main>
+
+<dtml-var manage_page_footer>

@@ -1,0 +1,93 @@
+<h1 tal:replace="structure context/manage_page_header">Header</h1>
+<h1 tal:replace="structure context/manage_tabs">Tabs</h1>
+
+<main class="container-fluid">
+	<p class="form-help mb-4">
+		This page lists the exceptions that have occurred in this site
+		recently.  You can configure how many exceptions should be kept
+		and whether the exceptions should be copied to Zope's event log
+		file(s).
+	</p>
+
+	<form action="setProperties" method="post" 
+		tal:define="props container/getProperties">
+
+		<div class="form-group row">
+			<label for="id" class="form-label col-sm-5 col-md-4">Number of exceptions to keep</label>
+			<div class=" col-sm-7 col-md-8">
+				<input type="text" class="form-control" name="keep_entries" 
+					tal:attributes="value props/keep_entries" />
+			</div>
+		</div>
+
+		<div class="form-group row">
+			<label for="id" class="form-label col-sm-5 col-md-4">Copy exceptions to the event log</label>
+			<div class=" col-sm-7 col-md-8">
+				<input type="checkbox"
+					class="checkbox-list-item" 
+					name="copy_to_zlog"
+					tal:attributes="checked props/copy_to_zlog;
+					disabled not:container/checkEventLogPermission|nothing" />
+			</div>
+		</div>
+
+		<div class="form-group row">
+			<label for="id" class="form-label col-sm-5 col-md-4">Ignored exception types</label>
+			<div class=" col-sm-7 col-md-8">
+				<textarea name="ignored_exceptions:lines" class="form-control" rows="3"
+					tal:content="python: '\n'.join(props['ignored_exceptions'])"></textarea>
+			</div>
+		</div>
+
+
+		<div class="zmi-controls">
+			<input class="btn btn-primary" type="submit" name="submit" value="Save Changes" />
+		</div>
+
+	</form>
+
+
+	<h3>Exception Log (most recent first)</h3>
+	<div tal:define="entries container/getLogEntries">
+	
+		<div class="alert alert-info" tal:condition="not:entries">No exceptions logged.</div>
+		
+		<table class="table table-sm zmi-errorlog-entries" style="font-size:smaller" tal:condition="entries">
+			<thead>
+				<tr>
+					<th class="zmi-time">Time</th>
+					<th class="zmi-username" title="User Id">Username</th>
+					<th class="zmi-exception">Exception</th>
+					<th class="blank">&nbsp;</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr tal:repeat="entry entries">
+					<td class="zmi-time" style="white-space:nowrap">
+						<span tal:replace="python: modules['DateTime'].DateTime(entry['time']).Time()">13:04:41</span>
+					</td>
+					<td class="zmi-username">
+						<span tal:replace="string: ${entry/username} (${entry/userid})">joe (joe)</span>
+					</td>
+					<td class="zmi-exception">
+						<a href="showEntry" tal:attributes="href string:showEntry?id=${entry/id}">
+							<span tal:replace="entry/type">AttributeError</span>:
+							<span tal:define="value entry/value"
+								tal:content="python: len(value) &lt; 70 and value or value[:70] + '...'"
+								>Application object has no attribute "zzope"</span>
+						</a>
+					</td>
+					<td><a href="#" tal:attributes="href string:${context/absolute_url}/forgetEntry?id=${entry/id}"
+						>Forget this entry</a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<form action="manage_main" method="GET">
+		<div class="zmi-controls">
+			<input class="btn btn-primary" type="submit" name="submit" value="Refresh" />
+		</div>
+	</form>
+
+<h1 tal:replace="structure context/manage_page_footer">Footer</h1>

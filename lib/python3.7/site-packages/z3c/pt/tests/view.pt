@@ -1,0 +1,9 @@
+<div xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:tal="http://xml.zope.org/namespaces/tal">
+  <span tal:content="view" />
+  <span tal:content="context" />
+  <span tal:content="request" />
+  <span tal:content="options/test" />
+  <span tal:condition="not:not:exists:options"
+  	tal:content="options/test/lower" />
+</div>

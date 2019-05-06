@@ -1,0 +1,30 @@
+<dtml-var manage_page_header>
+
+<dtml-var manage_tabs>
+
+<main class="container-fluid">
+
+	<dtml-if historyComparisonResults>
+
+		<table class="mt-5">
+			<tr>
+				<td>Changes to &dtml-id; as of</td>
+				<td><dtml-var dt1 fmt="%Y-%m-%d %H:%M"></td>
+			</tr>
+			<tr>
+				<td>to get to &dtml-id; as of</td>
+				<td><dtml-var dt2 fmt="%Y-%m-%d %H:%M"></td>
+			</tr>
+		</table>
+
+		<dtml-var historyComparisonResults>
+		
+	<dtml-else>
+
+		<div class="alert alert-warning">This object does not provide comparison support.</div>
+
+	</dtml-if>
+
+</main>
+
+<dtml-var manage_page_footer>

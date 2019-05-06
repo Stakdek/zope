@@ -1,0 +1,17 @@
+<html>
+<body>
+<p>Title</p>
+<p>A Header:</p>
+
+<pre>
+   That has an example
+
+   This goes on::
+
+      For another example
+</pre>
+<p>Another Header::</p>
+<p>But it doesn't actually have an example. Just
+more text.</p>
+</body>
+</html>

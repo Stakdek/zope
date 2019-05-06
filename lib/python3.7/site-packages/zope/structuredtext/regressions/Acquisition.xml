@@ -1,0 +1,406 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
+<book>
+<title>Acquisition</title>
+<section>
+<title>Acquisition</title>
+<para>
+
+Acquisition <ulink href="#ref1">[1]</ulink>is a mechanism that allows objects to obtain
+  attributes from their environment.  It is similar to inheritence,
+  except that, rather than traversing an inheritence hierarchy
+  to obtain attributes, a containment hierarchy is traversed.</para>
+
+<para>
+
+The <ulink url="ExtensionClass.html">ExtensionClass</ulink>. release includes mix-in
+  extension base classes that can be used to add acquisition as a
+  feature to extension subclasses.  These mix-in classes use the
+  context-wrapping feature of ExtensionClasses to implement
+  acquisition. Consider the following example:<programlisting>
+<![CDATA[
+import ExtensionClass, Acquisition
+
+class C(ExtensionClass.Base):
+  color='red'
+
+class A(Acquisition.Implicit):
+
+  def report(self):
+    print self.color
+
+a=A()
+c=C()
+c.a=A()
+
+c.a.report() # prints 'red'
+
+d=C()
+d.color='green'
+d.a=a
+
+d.a.report() # prints 'green'
+
+a.report() # raises an attribute error
+]]></programlisting>
+</para>
+
+<para>
+
+The class <literal>A</literal>inherits acquisition behavior from
+  <literal>Acquisition.Implicit</literal>.  The object, <literal>a</literal>, "has" the color of
+  objects <literal>c</literal>and <literal>d</literal>when it is accessed through them, but it
+  has no color by itself.  The object <literal>a</literal>obtains attributes
+  from it's environment, where it's environment is defined by
+  the access path used to reach <literal>a</literal>.</para>
+
+
+<section>
+<title>Acquisition wrappers</title>
+<para>
+
+When an object that supports acquisition is accessed through
+    an extension class instance, a special object, called an
+    acquisition wrapper, is returned.  In the example above, the
+    expression <literal>c.a</literal>returns an acquisition wrapper that
+    contains references to both <literal>c</literal>and <literal>a</literal>.  It is this wrapper
+    that performs attribute lookup in <literal>c</literal>when an attribute
+    cannot be found in <literal>a</literal>.</para>
+
+<para>
+
+Aquisition wrappers provide access to the wrapped objects
+    through the attributes <literal>aq_parent</literal>, <literal>aq_self</literal>, <literal>aq_base</literal>.  
+    In the example above, the expressions:<programlisting>
+<![CDATA[
+'c.a.aq_parent is c'
+]]></programlisting>
+</para>
+
+<para>
+
+and:<programlisting>
+<![CDATA[
+'c.a.aq_self is a'
+]]></programlisting>
+</para>
+
+<para>
+
+both evaluate to true, but the expression:<programlisting>
+<![CDATA[
+'c.a is a'
+]]></programlisting>
+</para>
+
+<para>
+
+evaluates to false, because the expression <literal>c.a</literal>evaluates
+    to an acquisition wrapper around <literal>c</literal>and <literal>a</literal>, not <literal>a</literal>itself.</para>
+
+<para>
+
+The attribute <literal>aq_base</literal>is similar to <literal>aq_self</literal>.  Wrappers may be
+    nested and <literal>aq_self</literal>may be a wrapped object.  The <literal>aq_base</literal>attribute is the underlying object with all wrappers removed.</para>
+
+
+</section>
+
+<section>
+<title>Acquisition Control</title>
+<para>
+
+Two styles of acquisition are supported in the current
+    ExtensionClass release, implicit and explicit aquisition.</para>
+
+
+<section>
+<title>Implicit acquisition</title>
+<para>
+
+Implicit acquisition is so named because it searches for
+      attributes from the environment automatically whenever an
+      attribute cannot be obtained directly from an object or
+      through inheritence.</para>
+
+<para>
+
+An attribute may be implicitly acquired if it's name does
+      not begin with an underscore, <literal>_</literal>.</para>
+
+<para>
+
+To support implicit acquisition, an object should inherit
+      from the mix-in class <literal>Acquisition.Implicit</literal>.</para>
+
+
+</section>
+
+<section>
+<title>Explicit Acquisition</title>
+<para>
+
+When explicit acquisition is used, attributes are not
+      automatically obtained from the environment.  Instead, the
+      method <literal>aq_aquire</literal>must be used, as in:<programlisting>
+<![CDATA[
+print c.a.aq_acquire('color')
+]]></programlisting>
+</para>
+
+<para>
+
+To support explicit acquisition, an object should inherit
+      from the mix-in class <literal>Acquisition.Explicit</literal>.</para>
+
+
+</section>
+
+<section>
+<title>Controlled Acquisition</title>
+<para>
+
+A class (or instance) can provide attribute by attribute control
+      over acquisition.  This is done by:</para>
+
+<itemizedlist>
+<listitem><para>
+subclassing from <literal>Acquisition.Explicit</literal>, and</para></listitem>
+<listitem><para>
+setting all attributes that should be acquired to the special
+        value: <literal>Acquisition.Acquired</literal>.  Setting an attribute to this
+        value also allows inherited attributes to be overridden with
+        acquired ones.<para>
+
+For example, in:<programlisting>
+<![CDATA[
+class C(Acquisition.Explicit):
+   id=1
+   secret=2
+   color=Acquisition.Acquired
+   __roles__=Acquisition.Acquired
+]]></programlisting>
+</para>
+
+<para>
+
+The <emphasis Role="emphasis">only</emphasis> attributes that are automatically acquired from
+        containing objects are <literal>color</literal>, and <literal>__roles__</literal>.  Note also
+        that the <literal>__roles__</literal>attribute is acquired even though it's
+        name begins with an underscore.  In fact, the special
+        <literal>Acquisition.Acquired</literal>value can be used in
+        <literal>Acquisition.Implicit</literal>objects to implicitly acquire selected
+        objects that smell like private objects.</para>
+
+</para></listitem>
+</itemizedlist>
+
+</section>
+
+<section>
+<title>Filtered Acquisition</title>
+<para>
+
+The acquisition method, <literal>aq_acquire</literal>, accepts two optional
+      arguments. The first of the additional arguments is a
+      "filtering" function that is used when considering whether to
+      acquire an object.  The second of the additional arguments is an
+      object that is passed as extra data when calling the filtering
+      function and which defaults to <literal>None</literal>.</para>
+
+<para>
+
+The filter function is called with five arguments:</para>
+
+<itemizedlist>
+<listitem><para>
+The object that the <literal>aq_acquire</literal>method was called on,</para></listitem>
+<listitem><para>
+The object where an object was found,</para></listitem>
+<listitem><para>
+The name of the object, as passed to <literal>aq_acquire</literal>,</para></listitem>
+<listitem><para>
+The object found, and</para></listitem>
+<listitem><para>
+The extra data passed to <literal>aq_acquire</literal>.</para></listitem>
+</itemizedlist>
+<para>
+
+If the filter returns a true object that the object found is
+      returned, otherwise, the acquisition search continues.</para>
+
+<para>
+
+For example, in:<programlisting>
+<![CDATA[
+from Acquisition import Explicit
+
+class HandyForTesting:
+    def __init__(self, name): self.name=name
+    def __str__(self):
+        return "%s(%s)" % (self.name, self.__class__.__name__)
+    __repr__=__str__
+
+class E(Explicit, HandyForTesting): pass
+
+class Nice(HandyForTesting):
+    isNice=1
+    def __str__(self):
+        return HandyForTesting.__str__(self)+' and I am nice!'
+    __repr__=__str__
+
+a=E('a')
+a.b=E('b')
+a.b.c=E('c')
+a.p=Nice('spam')
+a.b.p=E('p')
+
+def find_nice(self, ancestor, name, object, extra):
+    return hasattr(object,'isNice') and object.isNice
+
+print a.b.c.aq_acquire('p', find_nice)
+]]></programlisting>
+</para>
+
+<para>
+
+The filtered acquisition in the last line skips over the first
+      attribute it finds with the name <literal>p</literal>, because the attribute
+      doesn't satisfy the condition given in the filter. The output of
+      the last line is:<programlisting>
+<![CDATA[
+spam(Nice) and I am nice!
+]]></programlisting>
+</para>
+
+
+</section>
+
+</section>
+
+<section>
+<title>Acquisition and methods</title>
+<para>
+
+Python methods of objects that support acquisition can use
+    acquired attributes as in the <literal>report</literal>method of the first example
+    above.  When a Python method is called on an object that is
+    wrapped by an acquisition wrapper, the wrapper is passed to the
+    method as the first argument.  This rule also applies to
+    user-defined method types and to C methods defined in pure mix-in
+    classes.</para>
+
+<para>
+
+Unfortunately, C methods defined in extension base classes that
+    define their own data structures, cannot use aquired attributes at
+    this time.  This is because wrapper objects do not conform to the
+    data structures expected by these methods.</para>
+
+
+</section>
+
+<section>
+<title>Acquiring Acquiring objects</title>
+<para>
+
+Consider the following example:<programlisting>
+<![CDATA[
+from Acquisition import Implicit
+
+class C(Implicit):
+    def __init__(self, name): self.name=name
+    def __str__(self):
+        return "%s(%s)" % (self.name, self.__class__.__name__)
+    __repr__=__str__
+
+a=C("a")
+a.b=C("b")
+a.b.pref="spam"
+a.b.c=C("c")
+a.b.c.color="red"
+a.b.c.pref="eggs"
+a.x=C("x")
+
+o=a.b.c.x
+]]></programlisting>
+</para>
+
+<para>
+
+The expression <literal>o.color</literal>might be expected to return <literal>"red"</literal>. In
+    earlier versions of ExtensionClass, however, this expression
+    failed.  Acquired acquiring objects did not acquire from the
+    environment they were accessed in, because objects were only
+    wrapped when they were first found, and were not rewrapped as they
+    were passed down the acquisition tree.</para>
+
+<para>
+
+In the current release of ExtensionClass, the expression "o.color"
+    does indeed return <literal>"red"</literal>.</para>
+
+<para>
+
+When searching for an attribute in <literal>o</literal>, objects are searched in
+    the order <literal>x</literal>, <literal>a</literal>, <literal>b</literal>, <literal>c</literal>. So, for example, the expression,
+    <literal>o.pref</literal>returns <literal>"spam"</literal>, not <literal>"eggs"</literal>.  In earlier releases of
+    ExtensionClass, the attempt to get the <literal>pref</literal>attribute from <literal>o</literal>would have failed.</para>
+
+<para>
+
+If desired, the current rules for looking up attributes in complex
+    expressions can best be understood through repeated application of
+    the <literal>__of__</literal>method:</para>
+
+<variablelist>
+<varlistentry><term>
+<literal>a.x</literal></term>
+<listitem><para>
+<literal>x.__of__(a)</literal></para></listitem>
+</varlistentry>
+<varlistentry><term>
+<literal>a.b</literal></term>
+<listitem><para>
+<literal>b.__of__(a)</literal></para></listitem>
+</varlistentry>
+<varlistentry><term>
+<literal>a.b.x</literal></term>
+<listitem><para>
+<literal>x.__of__(a).__of__(b.__of__(a))</literal></para></listitem>
+</varlistentry>
+<varlistentry><term>
+<literal>a.b.c</literal></term>
+<listitem><para>
+<literal>c.__of__(b.__of__(a))</literal></para></listitem>
+</varlistentry>
+<varlistentry><term>
+<literal>a.b.c.x</literal></term>
+<listitem><para>
+<literal>x.__of__(a).__of__(b.__of__(a)).__of__(c.__of__(b.__of__(a)))</literal></para></listitem>
+</varlistentry>
+</variablelist>
+<para>
+
+and by keeping in mind that attribute lookup in a wrapper
+    is done by trying to lookup the attribute in the wrapped object
+    first and then in the parent object.  In the expressions above
+    involving the <literal>__of__</literal>method, lookup proceeds from left to right.</para>
+
+<para>
+
+Note that heuristics are used to avoid most of the repeated
+    lookups. For example, in the expression: <literal>a.b.c.x.foo</literal>, the object
+    <literal>a</literal>is searched no more than once, even though it is wrapped three
+    times.</para>
+
+
+</section>
+
+</section>
+<para>
+
+<anchor id="ref1"/>[1]Gil, J., Lorenz, D., 
+   <ulink url="http://www.bell-labs.com/people/cope/oopsla/Oopsla96TechnicalProgramAbstracts.html#GilLorenz">Environmental Acquisition--A New Inheritance-Like Abstraction Mechanism</ulink>, 
+   OOPSLA '96 Proceedings, ACM SIG-PLAN, October, 1996</para>
+
+</book>

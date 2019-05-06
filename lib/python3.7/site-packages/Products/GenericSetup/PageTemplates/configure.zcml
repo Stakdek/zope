@@ -1,0 +1,9 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <adapter factory=".exportimport.ZopePageTemplateBodyAdapter"/>
+
+  <class class="Products.PageTemplates.ZopePageTemplate.ZopePageTemplate">
+    <implements interface=".interfaces.IZopePageTemplate" />
+  </class>
+
+</configure>

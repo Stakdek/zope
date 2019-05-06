@@ -1,0 +1,139 @@
+Metadata-Version: 2.1
+Name: WSGIProxy2
+Version: 0.4.6
+Summary: A WSGI Proxy with various http client backends
+Home-page: https://github.com/gawel/WSGIProxy2/
+Author: Gael Pasgrimaud
+Author-email: gael@gawel.org
+License: MIT
+Keywords: wsgi proxy
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Topic :: Internet :: WWW/HTTP :: WSGI :: Application
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.2
+Classifier: Programming Language :: Python :: 3.3
+Requires-Dist: webob
+Requires-Dist: six
+
+Installation
+============
+
+With pip::
+
+  $ pip install WSGIProxy2
+
+Install optionnal backends::
+
+  $ pip install requests restkit urllib3
+
+
+Usage
+=====
+
+Create a proxy::
+
+  >>> from wsgiproxy import HostProxy
+  >>> proxy = HostProxy(application_url)
+
+Then use it. Here is an example with WebOb but you can use it like a classic
+WSGI application::
+
+  >>> from webob import Request
+  >>> req = Request.blank('/form.html')
+  >>> resp = req.get_response(proxy)
+  >>> print(resp.text)
+  <html>...
+  ...</html>
+
+The Proxy application accept some keyword arguments. Those arguments are passed
+to the client during the process.
+
+If no client as specified then python httplib is used. It's recommended to use
+a more robust client able to manage a connection pool and stuff.
+
+Use `urllib3 <http://pypi.python.org/pypi/urllib3>`_::
+
+  >>> proxy = HostProxy(application_url, client='urllib3')
+
+Use `requests <http://pypi.python.org/pypi/requests>`_. This client support response streaming::
+
+  >>> proxy = HostProxy(application_url, client='requests')
+
+Use `restkit <http://pypi.python.org/pypi/restkit>`_. This client support
+request and response streaming but does not support python3 (will be fixed with
+the next release)::
+
+  >>> proxy = HostProxy(application_url, client='restkit') # doctest: +SKIP
+
+
+Changes
+=======
+
+0.4.6 (2019-02-22)
+------------------
+
+- PATCH added into (default) list of allowed methods
+
+
+0.4.5 (2018-09-19)
+------------------
+
+- Allow to use URIs with no path
+
+
+0.4.4 (2017-06-02)
+------------------
+
+- Clean up connection before returning result. This removes some
+  ResourceWarnings when testing
+
+
+0.4.3 (2017-02-17)
+------------------
+
+- Add OPTIONS to defaults allowed methods
+
+- Drop restkit support
+
+- Drop py26 support
+
+
+0.4.2 (2014-12-20)
+------------------
+
+- Undo webob's unquoting to handle paths with percent quoted utf8 characters
+  [Laurence Rowe]
+
+
+0.4.1 (2013-12-21)
+------------------
+
+- Include README_fixt.py in release
+
+
+0.4 (2013-12-21)
+----------------
+
+- fix tests.
+
+- change the way requests iter response
+
+
+0.3 (2013-09-12)
+----------------
+
+Make allowed_methods check optional
+
+0.2
+---
+
+Return the data not gzip decoded when using request
+
+0.1
+---
+
+Initial release
+
+

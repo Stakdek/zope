@@ -1,0 +1,17 @@
+=======================
+ Package configuration
+=======================
+
+The ``zope.publisher`` package provides a ZCML file that configures some
+adapters and security:
+
+  >>> from zope.configuration.xmlconfig import XMLConfig
+  >>> import zope.publisher
+
+  >>> XMLConfig('configure.zcml', zope.publisher)()
+
+  >>> len(list(zope.component.getGlobalSiteManager().registeredUtilities()))
+  22
+
+  >>> len(list(zope.component.getGlobalSiteManager().registeredAdapters()))
+  11

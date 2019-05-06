@@ -1,0 +1,11 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+  <subscriber
+      for="Products.Five.component.interfaces.IObjectManagerSite
+           zope.lifecycleevent.interfaces.IObjectMovedEvent"
+      handler=".update_sitemanager_bases_handler"
+      />
+
+</configure>

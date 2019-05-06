@@ -1,0 +1,104 @@
+<configure 
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:apidoc="http://namespaces.zope.org/apidoc"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    >
+
+  <include file="meta.zcml" package="zope.component" />
+  <include file="meta.zcml" package="zope.security" />
+  <include file="permissions.zcml" package="zope.security" />
+
+  <interface interface="zope.publisher.interfaces.browser.IBrowserSkinType" />
+  <interface interface="zope.publisher.interfaces.xmlrpc.IXMLRPCRequest" />
+
+  <interface
+      interface="zope.publisher.interfaces.browser.IDefaultBrowserLayer"
+      />
+
+  <class class="zope.publisher.http.HTTPRequest">
+    <implements
+        zcml:condition="installed zope.annotation"
+        interface="zope.annotation.interfaces.IAttributeAnnotatable"
+        />
+    <require
+        permission="zope.View"
+        interface="zope.publisher.interfaces.http.IHTTPApplicationRequest"/>
+  </class>
+
+  <class class="zope.publisher.http.URLGetter">
+    <allow attributes="get __getitem__ __str__" />
+  </class>
+
+  <class class="zope.publisher.http.DirectResult">
+    <allow interface="zope.publisher.http.IResult" />
+  </class>
+
+  <class class="zope.publisher.browser.BrowserRequest">
+    <allow
+      interface="zope.publisher.interfaces.browser.IBrowserApplicationRequest"
+      attributes="response locale __str__"
+      />
+  </class>
+
+  <class class="zope.publisher.browser.TestRequest">
+    <allow
+      interface="zope.publisher.interfaces.browser.IBrowserApplicationRequest"
+      attributes="response"
+      />
+  </class>
+
+  <class class="zope.publisher.browser.BrowserResponse">
+    <allow
+      interface="zope.publisher.interfaces.http.IHTTPResponse"
+      />
+  </class>
+
+  <adapter factory="zope.publisher.http.HTTPCharsets" />
+
+  <adapter
+    factory=".browser.ModifiableBrowserLanguages"
+    for="zope.publisher.interfaces.http.IHTTPRequest"
+    provides="zope.i18n.interfaces.IModifiableUserPreferredLanguages"
+    />
+  
+  <class class="._compat.Binary">
+    <allow attributes="data encode decode" />
+  </class>
+
+  <class class="._compat.Fault">
+    <allow attributes="faultCode faultString" />
+  </class>
+
+  <class class="._compat.DateTime">
+    <allow attributes="value" />
+  </class>
+
+  <adapter factory=".xmlrpc.ListPreMarshaller" />
+  <adapter factory=".xmlrpc.TuplePreMarshaller" />
+  <adapter factory=".xmlrpc.BinaryPreMarshaller" />
+  <adapter factory=".xmlrpc.FaultPreMarshaller" />
+  <adapter factory=".xmlrpc.DateTimePreMarshaller" />
+  <adapter factory=".xmlrpc.PythonDateTimePreMarshaller" />
+  <adapter factory=".xmlrpc.DictPreMarshaller" />
+
+  <adapter
+      name="default"
+      factory=".skinnable.getDefaultSkin"
+      for="zope.publisher.interfaces.browser.IBrowserRequest"
+      provides="zope.publisher.interfaces.IDefaultSkin"
+      />
+
+  <adapter
+      factory=".principallogging.PrincipalLogging"
+      provides=".interfaces.logginginfo.ILoggingInfo"
+      for="zope.security.interfaces.IPrincipal"
+      />
+
+  <apidoc:bookchapter
+      zcml:condition="have apidoc"
+      id="zopepublisherhttpresults.txt"
+      title="Creating HTTP Results"
+      doc_path="httpresults.txt"
+      />
+
+</configure>

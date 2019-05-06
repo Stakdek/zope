@@ -1,0 +1,22 @@
+<configure package="z3c.pt"
+           xmlns="http://namespaces.zope.org/zope"
+           xmlns:zcml="http://namespaces.zope.org/zcml">
+
+  <include package="zope.component" file="meta.zcml" />
+
+  <configure zcml:condition="installed zope.security">
+
+    <include package="zope.security" file="meta.zcml" />
+
+    <class class="chameleon.tal.RepeatItem">
+      <allow interface="chameleon.interfaces.ITALESIterator" />
+    </class>
+
+    <class class=".pagetemplate.BoundPageTemplate">
+      <allow attributes="__call__ __str__ __name__" />
+    </class>
+
+  </configure>
+
+</configure>
+

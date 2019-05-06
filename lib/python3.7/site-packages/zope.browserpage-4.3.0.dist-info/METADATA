@@ -1,0 +1,175 @@
+Metadata-Version: 2.1
+Name: zope.browserpage
+Version: 4.3.0
+Summary: ZCML directives for configuring browser views for Zope.
+Home-page: https://github.com/zopefoundation/zope.browserpage
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope3
+Provides-Extra: menu
+Provides-Extra: test
+Requires-Dist: setuptools
+Requires-Dist: zope.tal (>=4.2.0)
+Requires-Dist: zope.pagetemplate
+Requires-Dist: zope.component (>=3.7)
+Requires-Dist: zope.configuration
+Requires-Dist: zope.interface
+Requires-Dist: zope.publisher (>=3.8)
+Requires-Dist: zope.schema
+Requires-Dist: zope.security
+Requires-Dist: zope.traversing
+Provides-Extra: menu
+Requires-Dist: zope.browsermenu; extra == 'menu'
+Provides-Extra: test
+Requires-Dist: zope.browsermenu; extra == 'test'
+Requires-Dist: zope.testing; extra == 'test'
+Requires-Dist: zope.testrunner; extra == 'test'
+
+======================
+ ``zope.browserpage``
+======================
+
+.. image:: https://img.shields.io/pypi/v/zope.browserpage.svg
+        :target: https://pypi.python.org/pypi/zope.browserpage/
+        :alt: Latest release
+
+.. image:: https://img.shields.io/pypi/pyversions/zope.browserpage.svg
+        :target: https://pypi.org/project/zope.browserpage/
+        :alt: Supported Python versions
+
+.. image:: https://travis-ci.org/zopefoundation/zope.browserpage.svg?branch=master
+        :target: https://travis-ci.org/zopefoundation/zope.browserpage
+
+.. image:: https://coveralls.io/repos/github/zopefoundation/zope.browserpage/badge.svg?branch=master
+        :target: https://coveralls.io/github/zopefoundation/zope.browserpage?branch=master
+
+.. note::
+
+   This package is at present not reusable without depending on a large
+   chunk of the Zope Toolkit and its assumptions. It is maintained by the
+   `Zope Toolkit project <http://docs.zope.org/zopetoolkit/>`_.
+
+This package provides ZCML directives for configuring browser views.
+More specifically it defines the following ZCML directives:
+
+- ``browser:page``
+- ``browser:pages``
+- ``browser:view``
+
+These directives also support menu item registration for pages, when
+``zope.browsermenu`` package is installed. Otherwise, they simply ignore
+the menu attribute.
+
+
+=========
+ Changes
+=========
+
+4.3.0 (2018-10-05)
+==================
+
+- Add support for Python 3.7.
+
+
+4.2.0 (2017-08-02)
+==================
+
+- Add support for Python 3.5 and 3.6.
+
+- Drop support for Python 2.6 and 3.3.
+
+
+4.1.0 (2014-12-24)
+==================
+
+- Fix deprecated unittest methods.
+
+- Add explicit support for Python 3.4.
+
+- Add explicit support for PyPy.
+
+
+4.1.0a1 (2013-02-22)
+====================
+
+- Add support for Python 3.3.
+
+
+4.0.0 (2012-07-04)
+==================
+
+- When registering views, no longer pass the deprecated 'layer' agrument
+  to ``zope.component.registerAdapter``.  Instead, pass ``(for_, layer)``
+  as expected (forward-compatibility with ``zope.component`` 4.0.0).
+
+- Replace deprecated ``zope.interface.implements`` usage with equivalent
+  ``zope.interface.implementer`` decorator.
+
+- Drop support for Python 2.4 and 2.5.
+
+
+3.12.2 (2010-05-24)
+===================
+
+- Fix unit tests broken under Python 2.4 by the switch to the standard
+  library ``doctest`` module.
+
+
+3.12.1 (2010-04-30)
+===================
+
+- Prefer the standard library's ``doctest`` module to the one from
+  ``zope.testing``.
+
+
+3.12.0 (2010-04-26)
+===================
+
+- Move the implementation of ``tales:expressiontype`` here from
+  ``zope.app.pagetemplate``.
+
+
+3.11.0 (2009-12-22)
+===================
+
+- Move the named template implementation here from ``zope.app.pagetemplate``.
+
+
+3.10.1 (2009-12-22)
+===================
+
+- Depend on the ``untrustedpython`` extra of ``zope.security``, since we
+  import from ``zope.pagetemplate.engine``.
+
+
+3.10.0 (2009-12-22)
+===================
+
+- Remove the dependency on ``zope.app.pagetemplate`` by moving
+  ``viewpagetemplatefile``, ``simpleviewclass`` and
+  ``metaconfigure.registerType`` into this package.
+
+
+3.9.0 (2009-08-27)
+==================
+
+- Initial release. This package was split off from ``zope.app.publisher``.
+
+

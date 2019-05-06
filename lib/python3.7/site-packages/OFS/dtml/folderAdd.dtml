@@ -1,0 +1,40 @@
+<dtml-var manage_page_header>
+
+<main class="container-fluid">
+
+	<dtml-var "manage_form_title(this(), _, form_title='Add Folder', )">
+
+	<p class="form-help">
+		A Folder contains other objects. Use Folders to organize your
+		web objects in to logical groups. The <em>create public interface</em>
+		option creates an index document inside the Folder to give the
+		Folder a default HTML representation. The <em>create user folder</em>
+		option creates a User Folder inside the Folder to hold authorization
+		information for the Folder.
+	</p>
+
+	<form action="manage_addFolder" method="post" class="zmi-folder">
+
+		<div class="form-group row">
+			<label for="id" class="form-label	col-sm-3 col-md-2">Id</label>
+			<div class="col-sm-9 col-md-10">
+				<input id="id" class="form-control" type="text" name="id" value="" />
+			</div>
+		</div>
+
+		<div class="form-group row">
+			<label for="title" class="form-label col-sm-3 col-md-2">Title</label>
+			<div class="col-sm-9 col-md-10">
+				<input id="title" class="form-control" type="text" name="title" value="" />
+			</div>
+		</div>
+
+		<div class="zmi-controls">
+			<input class="btn btn-primary" type="submit" name="submit" value="Add" />
+		</div>
+
+	</form>
+
+</main>
+
+<dtml-var manage_page_footer>

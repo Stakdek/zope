@@ -1,0 +1,130 @@
+<tal:block define="base_context_id context/getBaselineContextID;
+                   context_id request/context_id|nothing;
+                   contexts context/listContextInfos;
+                   base_context_title python:[c['title'] for c in contexts if c['id']==base_context_id];
+                   base_context_title python:base_context_title and base_context_title[0] or 'NOT SET';
+                   context_title python:[c['title'] for c in contexts if c['id']==context_id];
+                   context_title python:context_title and context_title[0] or 'UNKNOWN';
+                   extension_contexts python:[c for c in contexts if c['type'] in ['extension','snapshot']];
+                   extension_contexts_ordered_by_id python:[c for c in context.listContextInfos(order_by='sortable_id') if c['type'] in ['extension','snapshot']];
+                   has_pending_upgrades context/hasPendingUpgrades;
+                   ">
+<h1 tal:replace="structure context/manage_page_header">PAGE HEADER</h1>
+<h2 tal:replace="structure context/manage_tabs">TABS</h2>
+
+<h3>Site Configuration Full Import</h3>
+
+<p class="form-help">
+For advanced options, like re-running individual steps,
+see the <a href="manage_importSteps">Advanced Import</a> tab.
+</p>
+<p class="form-help" tal:condition="has_pending_upgrades">
+  <strong>
+    Note: there are profiles with pending <a href="manage_upgrades">upgrades</a>.
+  </strong>
+</p>
+
+<h3>Select Profile or Snapshot</h3>
+<p class="form-help">
+  After you have selected a profile, you will get some options.
+</p>
+<tal:title_or_id repeat="select_key python:['title', 'id']">
+<form action="." method="post" id="profileform"
+      tal:attributes="action string:${context/absolute_url}/manage_fullImport;
+                      id string:profileform_${select_key}">
+  <p tal:condition="python:select_key == 'title'">You can select a profile by <strong>title</strong>:</p>
+  <p tal:condition="python:select_key == 'id'">or you can select a profile by <strong>id</strong>:</p>
+<select name="context_id"
+        tal:attributes="onchange string:document.getElementById('profileform_${select_key}').submit();">
+ <option value=""
+         tal:attributes="selected not:context_id">
+ Please select an option</option>
+ <option value=""
+         tal:attributes="value base_context_id;
+                         selected python:context_id==base_context_id">
+   Current base profile (<span tal:replace="python:base_context_title if select_key == 'title' else base_context_id"/>)</option>
+ <option value="context-CONTEXT_ID"
+    tal:repeat="context python:extension_contexts if select_key == 'title' else extension_contexts_ordered_by_id"
+    tal:attributes="value context/id; selected python:context_id==context['id']"
+    tal:content="python:context[select_key]">Context title or id</option>
+</select>
+  <noscript>
+    <input class="form-element" type="submit"
+           name="manage_importSteps:method"
+           value="Switch profile" />
+  </noscript>
+</form>
+</tal:title_or_id>
+
+<div tal:condition="context_id|nothing">
+
+<p tal:condition="python:context_id == base_context_id"
+   style="color: red">
+You have selected the baseline profile.
+Reapplying these import steps is potentially a dangerous operation.
+</p>
+
+<h3>Import all steps of "<span tal:replace="context_title">Base profile</span>"</h3>
+
+<p class="form-help" tal:condition="python:context.hasPendingUpgrades(context_id)">
+  <strong>
+    Note: there are pending <a href="manage_upgrades" tal:attributes="href string:manage_upgrades?profile_id=${context_id}">upgrades</a> for
+    this profile.
+  </strong>
+</p>
+<form action="." method="post" enctype="multipart/form-data"
+      tal:attributes="action context/absolute_url">
+<input type="hidden" name="context_id" value="" tal:attributes="value context_id"/>
+
+<tal:dependencies condition="python:len(context.getProfileDependencyChain(context_id)) &gt; 1">
+<p>What do you want to do with dependency profiles (listed in the <code>metadata.xml</code> of the chosen profile)?</p>
+<p>
+    <input class="form-element" type="radio" id="dependency_strategy_upgrade"
+           name="dependency_strategy" value="upgrade" checked="checked" />
+    <label for="dependency_strategy_upgrade">Apply new profiles. Run <strong>upgrade</strong> steps for already applied profiles. <strong>Recommended.</strong></label>
+</p>
+<p>
+    <input class="form-element" type="radio" id="dependency_strategy_reapply"
+           name="dependency_strategy" value="reapply" />
+    <label for="dependency_strategy_reapply"><strong>Apply</strong> all profiles. Already applied profiles are reapplied.</label>
+</p>
+<p>
+    <input class="form-element" type="radio" id="dependency_strategy_new"
+           name="dependency_strategy" value="new" />
+    <label for="dependency_strategy_new">Apply <strong>only new</strong> profiles. Already applied profiles are left as is.</label>
+</p>
+<p>
+    <input class="form-element" type="radio" id="dependency_strategy_ignore"
+           name="dependency_strategy" value="ignore" />
+    <label for="dependency_strategy_ignore"><strong>Ignore</strong> dependency profiles.</label>
+</p>
+</tal:dependencies>
+
+<p>
+    <input class="form-element" type="submit"
+           name="manage_importAllSteps:method"
+           value=" Import all steps " />
+</p>
+
+<table cellspacing="0" cellpadding="4"
+       tal:condition="options/messages | nothing">
+
+  <tr class="list-header">
+   <td colspan="4">Message Log</td>
+  </tr>
+
+  <tr valign="top"
+      tal:repeat="item options/messages/items">
+   <td tal:content="python: item[0]">STEP</td>
+   <td colspan="3"
+       tal:content="structure python: item[1].replace('\n', '&lt;br /&gt;')"
+       >MESSAGE</td>
+  </tr>
+
+</table>
+</form>
+
+</div>
+
+<h1 tal:replace="structure context/manage_page_footer">PAGE FOOTER</h1>
+</tal:block>

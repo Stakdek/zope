@@ -1,0 +1,28 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
+<book>
+<para>
+
+Title</para>
+
+<para>
+
+A Header:<programlisting>
+<![CDATA[
+That has an example
+
+This goes on::
+
+   For another example
+]]></programlisting>
+</para>
+
+<para>
+
+Another Header::</para>
+
+<para>
+
+But it doesn't actually have an example. Just
+more text.</para>
+
+</book>

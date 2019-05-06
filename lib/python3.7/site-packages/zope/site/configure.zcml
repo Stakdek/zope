@@ -1,0 +1,94 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           i18n_domain="zope">
+
+  <include file="meta.zcml" package="zope.component" />
+  <include file="meta.zcml" package="zope.security" />
+  <include file="permissions.zcml" package="zope.security" />
+
+  <interface interface="zope.interface.Interface" />
+
+  <!-- Site and Site Manager Framework -->
+
+  <module module=".interfaces">
+    <allow attributes="ISite" />
+  </module>
+
+  <class class=".site.LocalSiteManager">
+    <implements
+        interface="zope.annotation.interfaces.IAttributeAnnotatable" />
+    <require
+        permission="zope.ManageSite"
+        interface="zope.container.interfaces.IReadContainer" />
+    <require
+        permission="zope.ManageSite"
+        interface="zope.interface.interfaces.IComponentLookup
+                   zope.container.interfaces.IWriteContainer" />
+  </class>
+
+  <class class="zope.interface.registry.UtilityRegistration">
+    <require
+        permission="zope.ManageSite"
+        interface="zope.interface.interfaces.IUtilityRegistration"
+        />
+  </class>
+
+  <class class=".site.SiteManagementFolder">
+    <factory />
+    <implements
+        interface="zope.annotation.interfaces.IAttributeAnnotatable"
+        />
+    <require
+        permission="zope.ManageSite"
+        interface="zope.container.interfaces.IReadContainer" />
+    <require
+        permission="zope.ManageSite"
+        interface="zope.container.interfaces.IWriteContainer"
+        />
+  </class>
+
+  <adapter
+      for="zope.interface.interfaces.IComponentLookup"
+      provides="zope.filerepresentation.interfaces.IDirectoryFactory"
+      factory=".site.SMFolderFactory"
+      permission="zope.ManageContent"
+      />
+
+  <adapter factory=".site.SiteManagerAdapter" />
+
+  <subscriber
+      for="zope.component.interfaces.ISite
+           zope.container.interfaces.IObjectMovedEvent"
+      handler=".site.changeSiteConfigurationAfterMove"
+      />
+
+  <class class=".folder.Folder">
+    <factory
+        id="zope.app.content.Folder"
+        title="Folder"
+        description="Minimal folder"
+        />
+    <allow
+        attributes="getSiteManager"
+        />
+    <require
+        permission="zope.ManageServices"
+        attributes="setSiteManager"
+        />
+    <require
+        permission="zope.View"
+        interface="zope.container.interfaces.IReadContainer"
+        />
+    <require
+        permission="zope.ManageContent"
+        interface="zope.container.interfaces.IWriteContainer"
+        />
+  </class>
+
+  <adapter
+      provides="zope.location.interfaces.ISublocations"
+      for=".interfaces.IFolder"
+      factory=".folder.FolderSublocations"
+      />
+
+  <subscriber handler=".site.siteManagerContainerRemoved" />
+</configure>

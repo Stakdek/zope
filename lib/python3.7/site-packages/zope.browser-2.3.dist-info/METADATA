@@ -1,0 +1,154 @@
+Metadata-Version: 2.0
+Name: zope.browser
+Version: 2.3
+Summary: Shared Zope Toolkit browser components
+Home-page: https://zopebrowser.readthedocs.io
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Keywords: zope browser component
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope3
+Provides-Extra: test
+Provides-Extra: docs
+Requires-Dist: setuptools
+Requires-Dist: zope.interface
+Provides-Extra: docs
+Requires-Dist: Sphinx; extra == 'docs'
+Requires-Dist: repoze.sphinx.autointerface; extra == 'docs'
+Requires-Dist: sphinx-rtd-theme; extra == 'docs'
+Provides-Extra: test
+Requires-Dist: zope.testrunner; extra == 'test'
+
+==============
+ zope.browser
+==============
+
+.. image:: https://img.shields.io/pypi/v/zope.browser.svg
+        :target: https://pypi.python.org/pypi/zope.browser/
+        :alt: Latest release
+
+.. image:: https://img.shields.io/pypi/pyversions/zope.browser.svg
+        :target: https://pypi.org/project/zope.browser/
+        :alt: Supported Python versions
+
+.. image:: https://travis-ci.org/zopefoundation/zope.browser.svg?branch=master
+        :target: https://travis-ci.org/zopefoundation/zope.browser
+
+.. image:: https://coveralls.io/repos/github/zopefoundation/zope.browser/badge.svg?branch=master
+        :target: https://coveralls.io/github/zopefoundation/zope.browser?branch=master
+
+.. image:: https://readthedocs.org/projects/zopebrowser/badge/?version=latest
+        :target: https://zopebrowser.readthedocs.io/en/latest/
+        :alt: Documentation Status
+
+
+This package provides shared browser components for the Zope Toolkit.
+These components consist of a set of interfaces defining common
+concepts, including:
+
+- ``IView``
+- ``IBrowserView``
+- ``IAdding``
+- ``ITerms``
+- ``ISystemErrorView``
+
+Documentation is hosted at https://zopebrowser.readthedocs.io
+
+
+===========
+ Changelog
+===========
+
+2.3 (2018-10-05)
+================
+
+- Add support for Python 3.7.
+
+
+2.2.0 (2017-08-10)
+==================
+
+- Add support for Python 3.5 and 3.6.
+
+- Drop support for Python 2.6, 3.2 and 3.3.
+
+- Host documentation at https://zopebrowser.readthedocs.io
+
+2.1.0 (2014-12-26)
+==================
+
+- Add support for Python 3.4.
+
+- Add support for testing on Travis.
+
+2.0.2 (2013-03-08)
+==================
+
+- Add Trove classifiers indicating CPython, 3.2 and PyPy support.
+
+2.0.1 (2013-02-11)
+==================
+
+- Add support for testing with tox.
+
+2.0.0 (2013-02-11)
+==================
+
+- Test coverage of 100% verified.
+
+- Add support for Python 3.3 and PyPy.
+
+- Drop support for Python 2.4 and 2.5.
+
+1.3 (2010-04-30)
+================
+
+- Remove ``test`` extra and ``zope.testing`` dependency.
+
+1.2 (2009-05-18)
+================
+
+- Move ``ISystemErrorView`` interface here from
+  ``zope.app.exception`` to break undesirable dependencies.
+
+- Fix home page and author's e-mail address.
+
+- Add doctests to ``long_description``.
+
+1.1 (2009-05-13)
+================
+
+- Move ``IAdding`` interface here from ``zope.app.container.interfaces``
+  to break undesirable dependencies.
+
+1.0 (2009-05-13)
+================
+
+- Move ``IView`` and ``IBrowserView`` interfaces here from
+  ``zope.publisher.interfaces`` to break undesirable dependencies.
+
+0.5.0 (2008-12-11)
+==================
+
+- Move ``ITerms`` interface here from ``zope.app.form.browser.interfaces``
+  to break undesirable dependencies.
+
+

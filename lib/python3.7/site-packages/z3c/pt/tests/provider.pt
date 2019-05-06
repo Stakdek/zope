@@ -1,0 +1,6 @@
+<html>
+  <body>
+    <div id="content" tal:content="structure provider: content" />
+    <div id="content" tal:content="structure provider: ${python: 'content'}" />
+  </body>
+</html>

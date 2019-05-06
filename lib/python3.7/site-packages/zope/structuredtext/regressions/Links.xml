@@ -1,0 +1,33 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
+<book>
+<title>This is LinkTest</title>
+<section>
+<title>This is LinkTest</title>
+<itemizedlist>
+<listitem><para>
+please click <ulink url="/Members/Zope">here</ulink></para></listitem>
+<listitem><para>
+please click <ulink url="/Members/Zope?a=b&c=d%20blabla">here</ulink></para></listitem>
+<listitem><para>
+please click <ulink url="http://www.zope.org">here</ulink></para></listitem>
+<listitem><para>
+please click <ulink url="http://www.zope.org/members/">here</ulink></para></listitem>
+<listitem><para>
+please click <ulink url="http://www.zope.org:2001">here</ulink></para></listitem>
+<listitem><para>
+please click <ulink url="http://www.zope.org:2001/members/">here</ulink></para></listitem>
+<listitem><para>
+please click <ulink url="http://www.zope.org:2001/%20/Members/zope?a=222&b=213&_xc=just%20a%20test">here</ulink></para></listitem>
+<listitem><para>
+please click <ulink url="http://www.zope.org:2001/%20/Members/zope?a=222&b=213&_xc=just%20a%20test">here</ulink></para></listitem>
+<listitem><para>
+please click <ulink url="http://www.zope.org:2001/%20/Members/zope?a=222&b=213&_xc=just%20a%20test">here</ulink></para></listitem>
+</itemizedlist>
+<para>
+
+And now a paragraph with <ulink url="http://www.zope-rocks.org">Link 1</ulink>and 
+  <ulink url="http://www.zope-is-kewl.com">Link 2</ulink>and <ulink url="http://www.freshmeat.net">one more link - yeah.</ulink></para>
+
+
+</section>
+</book>

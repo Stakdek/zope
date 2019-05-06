@@ -1,0 +1,5 @@
+<chapter>
+<figure><title>an inline image</title>
+<graphic fileref="path.jpg"></graphic>
+</figure>
+</chapter>

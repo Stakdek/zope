@@ -1,0 +1,75 @@
+Functional Tests
+================
+
+Set Up
+------
+
+Make this test available as a module so that stuff defined in here can
+be pickled properly:
+
+    >>> from zope.testing import module
+    >>> module.setUp(test, name='five.localsitemanager.browsertest')
+
+Load all of Five's configuration (this is a functional test):
+
+    >>> import Products.Five
+    >>> import five.localsitemanager
+    >>> from Zope2.App.zcml import load_config, load_string
+
+    >>> load_config('configure.zcml', package=Products.Five)
+    >>> load_config('configure.zcml', package=five.localsitemanager)
+    >>> load_string('<includeOverrides package="five.localsitemanager" file="overrides.zcml" />')
+
+Enable local component lookup hooks:
+
+    >>> from zope.component.hooks import setHooks
+    >>> setHooks()
+
+User Set Up
+-----------
+
+    >>> uf = app.acl_users
+    >>> _ignored = uf._doAddUser('admin', 'admin', ['Manager'], [])
+
+Create the test browser we'll be using:
+
+    >>> from Testing.testbrowser import Browser
+    >>> browser = Browser()
+    >>> browser.addHeader('Authorization', 'Basic admin:admin')
+
+Folder Set Up
+-------------
+
+Make a folder to use as a local site for component registration:
+
+    >>> from OFS.Folder import manage_addFolder
+    >>> manage_addFolder(app, 'folder')
+
+Look up the ``components.html`` view and make sure the ``Make Site`` action
+still works.
+
+    >>> browser.open('http://localhost/folder/components.html')
+    >>> browser.getControl('Make site').click()
+
+Make sure the site manager trail only leads back to the global component
+registry.
+
+    >>> '<dd class="sitemanager-trail">Global Registry =&gt; &lt;PersistentComponents /folder&gt;</dd>' in browser.contents
+    True
+
+Now we add a sub folder.
+
+    >>> manage_addFolder(app.folder, 'subfolder')
+
+    >>> browser.open('http://localhost/folder/subfolder/components.html')
+    >>> browser.getControl('Make site').click()
+
+    >>> '<dd class="sitemanager-trail">Global Registry =&gt; &lt;PersistentComponents /folder&gt; =&gt; &lt;PersistentComponents /folder/subfolder&gt;</dd>' in browser.contents
+    True
+
+Clean up
+--------
+
+    >>> module.tearDown(test, name='five.localsitemanager.browsertest')
+    >>> from zope.testing.cleanup import cleanUp
+    >>> cleanUp()

@@ -1,0 +1,19 @@
+<configure xmlns:meta="http://namespaces.zope.org/meta">
+
+  <meta:directives namespace="http://namespaces.zope.org/browser">
+
+    <meta:directive
+        name="defaultView"
+        schema=".zcml.IDefaultViewDirective"
+        handler=".zcml.defaultView"
+        />
+
+    <meta:directive
+        name="defaultSkin"
+        schema=".zcml.IDefaultSkinDirective"
+        handler=".zcml.defaultSkin"
+        />
+
+  </meta:directives>
+
+</configure>

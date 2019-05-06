@@ -1,0 +1,59 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:browser="http://namespaces.zope.org/browser"
+   i18n_domain="zope"
+   package="zope.traversing"
+   >
+
+  <include package="zope.publisher" file="meta.zcml" />
+  <include package="zope.security" file="meta.zcml" />
+
+  <include package="zope.browserresource" />
+  <include package="zope.location" />
+  <include package="zope.publisher" />
+  <include package="zope.traversing" />
+
+  <browser:defaultView name="index.html" />
+  <include package="zope.traversing.browser" />
+
+  <view
+      name="index.html"
+      for="zope.traversing.tests.test_vhosting.IFolder"
+      factory="zope.traversing.tests.test_vhosting.MyFolderPage"
+      type="zope.publisher.interfaces.browser.IDefaultBrowserLayer"
+      permission="zope.View"
+      />
+
+  <class class="zope.traversing.tests.test_vhosting.MyFolderPage">
+    <allow attributes="__call__" />
+  </class>
+
+  <view
+      name="index.html"
+      for="zope.traversing.tests.test_vhosting.MyTalesPage"
+      factory="zope.traversing.tests.test_vhosting.MyPageEval"
+      type="zope.publisher.interfaces.browser.IDefaultBrowserLayer"
+      permission="zope.View"
+      />
+
+  <class class="zope.traversing.tests.test_vhosting.MyPageEval">
+    <allow attributes="__call__" />
+  </class>
+
+  <class class="zope.traversing.tests.test_vhosting.MyTalesPage">
+    <factory
+        id="zope.traversing.tests.test_vhosting.MyTalesPage"
+        />
+    <require
+        permission="zope.View"
+        attributes="__call__ render"
+        />
+  </class>
+
+  <!-- Principals -->
+
+  <securityPolicy
+    component="zope.security.simplepolicies.PermissiveSecurityPolicy" />
+
+
+</configure>

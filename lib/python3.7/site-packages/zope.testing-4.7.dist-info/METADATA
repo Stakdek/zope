@@ -1,0 +1,1915 @@
+Metadata-Version: 2.0
+Name: zope.testing
+Version: 4.7
+Summary: Zope testing helpers
+Home-page: https://github.com/zopefoundation/zope.testing
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Keywords: zope testing doctest RENormalizing OutputChecker timeout logging
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Framework :: Zope3
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Software Development :: Testing
+Provides-Extra: test
+Requires-Dist: setuptools
+Provides-Extra: test
+
+=================
+``zope.testing``
+=================
+
+.. image:: https://img.shields.io/pypi/v/zope.testing.svg
+    :target: https://pypi.python.org/pypi/zope.testing/
+    :alt: Latest Version
+
+.. image:: https://travis-ci.org/zopefoundation/zope.testing.svg?branch=master
+        :target: https://travis-ci.org/zopefoundation/zope.testing
+
+.. image:: https://readthedocs.org/projects/zopetesting/badge/?version=latest
+        :target: http://zopetesting.readthedocs.org/en/latest/
+        :alt: Documentation Status
+
+This package provides a number of testing frameworks.
+
+cleanup
+  Provides a mixin class for cleaning up after tests that
+  make global changes.
+
+formparser
+  An HTML parser that extracts form information.
+
+  **Python 2 only**
+
+  This is intended to support functional tests that need to extract
+  information from HTML forms returned by the publisher.
+
+  See formparser.txt.
+
+loggingsupport
+  Support for testing logging code
+
+  If you want to test that your code generates proper log output, you
+  can create and install a handler that collects output.
+
+loghandler
+  Logging handler for tests that check logging output.
+
+module
+  Lets a doctest pretend to be a Python module.
+
+  See module.txt.
+
+renormalizing
+  Regular expression pattern normalizing output checker.
+  Useful for doctests.
+
+server
+  Provides a simple HTTP server compatible with the zope.app.testing
+  functional testing API.  Lets you interactively play with the system
+  under test.  Helpful in debugging functional doctest failures.
+
+  **Python 2 only**
+
+setupstack
+  A simple framework for automating doctest set-up and tear-down.
+  See setupstack.txt.
+
+wait
+  A small utility for dealing with timing non-determinism
+  See wait.txt.
+
+doctestcase
+  Support for defining doctests as methods of ``unittest.TestCase``
+  classes so that they can be more easily found by test runners, like
+  nose, that ignore test suites.
+
+.. contents::
+
+Getting started developing zope.testing
+=======================================
+
+zope.testing uses buildout.  To start, run ``python bootstrap.py``.  It will
+create a number of directories and the ``bin/buildout`` script.  Next, run
+``bin/buildout``.  It will create a test script for you.  Now, run ``bin/test``
+to run the zope.testing test suite.
+
+
+Parsing HTML Forms
+==================
+
+Sometimes in functional tests, information from a generated form must
+be extracted in order to re-submit it as part of a subsequent request.
+The `zope.testing.formparser` module can be used for this purpose.
+
+NOTE
+   formparser doesn't support Python 3.
+
+The scanner is implemented using the `FormParser` class.  The
+constructor arguments are the page data containing the form and
+(optionally) the URL from which the page was retrieved:
+
+  >>> import zope.testing.formparser
+
+  >>> page_text = '''\
+  ... <html><body>
+  ...   <form name="form1" action="/cgi-bin/foobar.py" method="POST">
+  ...     <input type="hidden" name="f1" value="today" />
+  ...     <input type="submit" name="do-it-now" value="Go for it!" />
+  ...     <input type="IMAGE" name="not-really" value="Don't."
+  ...            src="dont.png" />
+  ...     <select name="pick-two" size="3" multiple>
+  ...       <option value="one" selected>First</option>
+  ...       <option value="two" label="Second">Another</option>
+  ...       <optgroup>
+  ...         <option value="three">Third</option>
+  ...         <option selected="selected">Fourth</option>
+  ...       </optgroup>
+  ...     </select>
+  ...   </form>
+  ...
+  ...   Just for fun, a second form, after specifying a base:
+  ...   <base href="http://www.example.com/base/" />
+  ...   <form action = 'sproing/sprung.html' enctype="multipart/form">
+  ...     <textarea name="sometext" rows="5">Some text.</textarea>
+  ...     <input type="Image" name="action" value="Do something."
+  ...            src="else.png" />
+  ...     <input type="text" value="" name="multi" size="2" />
+  ...     <input type="text" value="" name="multi" size="3" />
+  ...   </form>
+  ... </body></html>
+  ... '''
+
+  >>> parser = zope.testing.formparser.FormParser(page_text)
+  >>> forms = parser.parse()
+
+  >>> len(forms)
+  2
+  >>> forms.form1 is forms[0]
+  True
+  >>> forms.form1 is forms[1]
+  False
+
+More often, the `parse()` convenience function is all that's needed:
+
+  >>> forms = zope.testing.formparser.parse(
+  ...     page_text, "http://cgi.example.com/somewhere/form.html")
+
+  >>> len(forms)
+  2
+  >>> forms.form1 is forms[0]
+  True
+  >>> forms.form1 is forms[1]
+  False
+
+Once we have the form we're interested in, we can check form
+attributes and individual field values:
+
+  >>> form = forms.form1
+  >>> form.enctype
+  'application/x-www-form-urlencoded'
+  >>> form.method
+  'post'
+
+  >>> keys = form.keys()
+  >>> keys.sort()
+  >>> keys
+  ['do-it-now', 'f1', 'not-really', 'pick-two']
+
+  >>> not_really = form["not-really"]
+  >>> not_really.type
+  'image'
+  >>> not_really.value
+  "Don't."
+  >>> not_really.readonly
+  False
+  >>> not_really.disabled
+  False
+
+Note that relative URLs are converted to absolute URLs based on the
+``<base>`` element (if present) or using the base passed in to the
+constructor.
+
+  >>> form.action
+  'http://cgi.example.com/cgi-bin/foobar.py'
+  >>> not_really.src
+  'http://cgi.example.com/somewhere/dont.png'
+
+  >>> forms[1].action
+  'http://www.example.com/base/sproing/sprung.html'
+  >>> forms[1]["action"].src
+  'http://www.example.com/base/else.png'
+
+Fields which are repeated are reported as lists of objects that
+represent each instance of the field::
+
+  >>> field = forms[1]["multi"]
+  >>> isinstance(field, list)
+  True
+  >>> [o.value for o in field]
+  ['', '']
+  >>> [o.size for o in field]
+  [2, 3]
+
+The ``<textarea>`` element provides some additional attributes:
+
+  >>> ta = forms[1]["sometext"]
+  >>> print ta.rows
+  5
+  >>> print ta.cols
+  None
+  >>> ta.value
+  'Some text.'
+
+The ``<select>`` element provides access to the options as well:
+
+  >>> select = form["pick-two"]
+  >>> select.multiple
+  True
+  >>> select.size
+  3
+  >>> select.type
+  'select'
+  >>> select.value
+  ['one', 'Fourth']
+
+  >>> options = select.options
+  >>> len(options)
+  4
+  >>> [opt.label for opt in options]
+  ['First', 'Second', 'Third', 'Fourth']
+  >>> [opt.value for opt in options]
+  ['one', 'two', 'three', 'Fourth']
+
+
+Support for testing logging code
+================================
+
+If you want to test that your code generates proper log output, you
+can create and install a handler that collects output:
+
+  >>> from zope.testing.loggingsupport import InstalledHandler
+  >>> handler = InstalledHandler('foo.bar')
+
+The handler is installed into loggers for all of the names passed. In
+addition, the logger level is set to 1, which means, log
+everything. If you want to log less than everything, you can provide a
+level keyword argument.  The level setting effects only the named
+loggers.
+
+  >>> import logging
+  >>> handler_with_levels = InstalledHandler('baz', level=logging.WARNING)
+
+Then, any log output is collected in the handler:
+
+  >>> logging.getLogger('foo.bar').exception('eek')
+  >>> logging.getLogger('foo.bar').info('blah blah')
+
+  >>> for record in handler.records:
+  ...     print_(record.name, record.levelname)
+  ...     print_(' ', record.getMessage())
+  foo.bar ERROR
+    eek
+  foo.bar INFO
+    blah blah
+
+A similar effect can be gotten by just printing the handler:
+
+  >>> print_(handler)
+  foo.bar ERROR
+    eek
+  foo.bar INFO
+    blah blah
+
+After checking the log output, you need to uninstall the handler:
+
+  >>> handler.uninstall()
+  >>> handler_with_levels.uninstall()
+
+At which point, the handler won't get any more log output.
+Let's clear the handler:
+
+  >>> handler.clear()
+  >>> handler.records
+  []
+
+And then log something:
+
+  >>> logging.getLogger('foo.bar').info('blah')
+
+and, sure enough, we still have no output:
+
+  >>> handler.records
+  []
+
+
+Regular expression pattern normalizing output checker
+=====================================================
+
+The pattern-normalizing output checker extends the default output checker with
+an option to normalize expected and actual output.
+
+You specify a sequence of patterns and replacements.  The replacements are
+applied to the expected and actual outputs before calling the default outputs
+checker.  Let's look at an example.  In this example, we have some times and
+addresses:
+
+    >>> want = '''\
+    ... <object object at 0xb7f14438>
+    ... completed in 1.234 seconds.
+    ... <BLANKLINE>
+    ... <object object at 0xb7f14440>
+    ... completed in 123.234 seconds.
+    ... <BLANKLINE>
+    ... <object object at 0xb7f14448>
+    ... completed in .234 seconds.
+    ... <BLANKLINE>
+    ... <object object at 0xb7f14450>
+    ... completed in 1.234 seconds.
+    ... <BLANKLINE>
+    ... '''
+
+    >>> got = '''\
+    ... <object object at 0xb7f14458>
+    ... completed in 1.235 seconds.
+    ...
+    ... <object object at 0xb7f14460>
+    ... completed in 123.233 seconds.
+    ...
+    ... <object object at 0xb7f14468>
+    ... completed in .231 seconds.
+    ...
+    ... <object object at 0xb7f14470>
+    ... completed in 1.23 seconds.
+    ...
+    ... '''
+
+We may wish to consider these two strings to match, even though they differ in
+actual addresses and times.  The default output checker will consider them
+different:
+
+    >>> import doctest
+    >>> doctest.OutputChecker().check_output(want, got, 0)
+    False
+
+We'll use the zope.testing.renormalizing.OutputChecker to normalize both the
+wanted and gotten strings to ignore differences in times and
+addresses:
+
+    >>> import re
+    >>> from zope.testing.renormalizing import OutputChecker
+    >>> checker = OutputChecker([
+    ...    (re.compile('[0-9]*[.][0-9]* seconds'), '<SOME NUMBER OF> seconds'),
+    ...    (re.compile('at 0x[0-9a-f]+'), 'at <SOME ADDRESS>'),
+    ...    ])
+
+    >>> checker.check_output(want, got, 0)
+    True
+
+Usual OutputChecker options work as expected:
+
+    >>> want_ellided = '''\
+    ... <object object at 0xb7f14438>
+    ... completed in 1.234 seconds.
+    ... ...
+    ... <object object at 0xb7f14450>
+    ... completed in 1.234 seconds.
+    ... <BLANKLINE>
+    ... '''
+
+    >>> checker.check_output(want_ellided, got, 0)
+    False
+
+    >>> checker.check_output(want_ellided, got, doctest.ELLIPSIS)
+    True
+
+When we get differencs, we output them with normalized text:
+
+    >>> source = '''\
+    ... >>> do_something()
+    ... <object object at 0xb7f14438>
+    ... completed in 1.234 seconds.
+    ... ...
+    ... <object object at 0xb7f14450>
+    ... completed in 1.234 seconds.
+    ... <BLANKLINE>
+    ... '''
+
+    >>> example = doctest.Example(source, want_ellided)
+
+    >>> print_(checker.output_difference(example, got, 0))
+    Expected:
+        <object object at <SOME ADDRESS>>
+        completed in <SOME NUMBER OF> seconds.
+        ...
+        <object object at <SOME ADDRESS>>
+        completed in <SOME NUMBER OF> seconds.
+        <BLANKLINE>
+    Got:
+        <object object at <SOME ADDRESS>>
+        completed in <SOME NUMBER OF> seconds.
+        <BLANKLINE>
+        <object object at <SOME ADDRESS>>
+        completed in <SOME NUMBER OF> seconds.
+        <BLANKLINE>
+        <object object at <SOME ADDRESS>>
+        completed in <SOME NUMBER OF> seconds.
+        <BLANKLINE>
+        <object object at <SOME ADDRESS>>
+        completed in <SOME NUMBER OF> seconds.
+        <BLANKLINE>
+    <BLANKLINE>
+
+    >>> print_(checker.output_difference(example, got,
+    ...                                 doctest.REPORT_NDIFF))
+    Differences (ndiff with -expected +actual):
+        - <object object at <SOME ADDRESS>>
+        - completed in <SOME NUMBER OF> seconds.
+        - ...
+          <object object at <SOME ADDRESS>>
+          completed in <SOME NUMBER OF> seconds.
+          <BLANKLINE>
+        + <object object at <SOME ADDRESS>>
+        + completed in <SOME NUMBER OF> seconds.
+        + <BLANKLINE>
+        + <object object at <SOME ADDRESS>>
+        + completed in <SOME NUMBER OF> seconds.
+        + <BLANKLINE>
+        + <object object at <SOME ADDRESS>>
+        + completed in <SOME NUMBER OF> seconds.
+        + <BLANKLINE>
+    <BLANKLINE>
+
+    If the wanted text is empty, however, we don't transform the actual output.
+    This is usful when writing tests.  We leave the expected output empty, run
+    the test, and use the actual output as expected, after reviewing it.
+
+    >>> source = '''\
+    ... >>> do_something()
+    ... '''
+
+    >>> example = doctest.Example(source, '\n')
+    >>> print_(checker.output_difference(example, got, 0))
+    Expected:
+    <BLANKLINE>
+    Got:
+        <object object at 0xb7f14458>
+        completed in 1.235 seconds.
+        <BLANKLINE>
+        <object object at 0xb7f14460>
+        completed in 123.233 seconds.
+        <BLANKLINE>
+        <object object at 0xb7f14468>
+        completed in .231 seconds.
+        <BLANKLINE>
+        <object object at 0xb7f14470>
+        completed in 1.23 seconds.
+        <BLANKLINE>
+    <BLANKLINE>
+
+If regular expressions aren't expressive enough, you can use arbitrary Python
+callables to transform the text.  For example, suppose you want to ignore
+case during comparison:
+
+    >>> checker = OutputChecker([
+    ...    lambda s: s.lower(),
+    ...    lambda s: s.replace('<blankline>', '<BLANKLINE>'),
+    ...    ])
+
+    >>> want = '''\
+    ... Usage: thundermonkey [options] [url]
+    ... <BLANKLINE>
+    ... Options:
+    ...     -h    display this help message
+    ... '''
+
+    >>> got = '''\
+    ... usage: thundermonkey [options] [URL]
+    ...
+    ... options:
+    ...     -h    Display this help message
+    ... '''
+
+    >>> checker.check_output(want, got, 0)
+    True
+
+Suppose we forgot that <BLANKLINE> must be in upper case:
+
+    >>> checker = OutputChecker([
+    ...    lambda s: s.lower(),
+    ...    ])
+
+    >>> checker.check_output(want, got, 0)
+    False
+
+The difference would show us that:
+
+    >>> source = '''\
+    ... >>> print_help_message()
+    ... ''' + want
+    >>> example = doctest.Example(source, want)
+    >>> print_(checker.output_difference(example, got,
+    ...                                 doctest.REPORT_NDIFF))
+    Differences (ndiff with -expected +actual):
+          usage: thundermonkey [options] [url]
+        - <blankline>
+        + <BLANKLINE>
+          options:
+              -h    display this help message
+    <BLANKLINE>
+
+
+It is possible to combine OutputChecker checkers for easy reuse:
+
+    >>> address_and_time_checker = OutputChecker([
+    ...    (re.compile('[0-9]*[.][0-9]* seconds'), '<SOME NUMBER OF> seconds'),
+    ...    (re.compile('at 0x[0-9a-f]+'), 'at <SOME ADDRESS>'),
+    ...    ])
+    >>> lowercase_checker = OutputChecker([
+    ...    lambda s: s.lower(),
+    ...    ])
+    >>> combined_checker = address_and_time_checker + lowercase_checker
+    >>> len(combined_checker.transformers)
+    3
+
+Combining a checker with something else does not work:
+
+    >>> lowercase_checker + 5 #doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    TypeError: unsupported operand type(s) for +: ...
+
+Using the 2to3 exception normalization:
+
+    >>> from zope.testing.renormalizing import (
+    ...     IGNORE_EXCEPTION_MODULE_IN_PYTHON2)
+    >>> checker = OutputChecker()
+    >>> want = """\
+    ... Traceback (most recent call last):
+    ... foo.bar.FooBarError: requires at least one argument."""
+    >>> got = """\
+    ... Traceback (most recent call last):
+    ... FooBarError: requires at least one argument."""
+    >>> result = checker.check_output(
+    ...     want, got, IGNORE_EXCEPTION_MODULE_IN_PYTHON2)
+    >>> import sys
+    >>> if sys.version_info[0] < 3:
+    ...     expected = True
+    ... else:
+    ...     expected = False
+    >>> result == expected
+    True
+
+When reporting a failing test and running in Python 2, the normalizer tries
+to be helpful by explaining how to test for exceptions in the traceback output.
+
+    >>> want = """\
+    ... Traceback (most recent call last):
+    ... foo.bar.FooBarErrorXX: requires at least one argument.
+    ... """
+    >>> got = """\
+    ... Traceback (most recent call last):
+    ... FooBarError: requires at least one argument.
+    ... """
+    >>> checker.check_output(want, got, IGNORE_EXCEPTION_MODULE_IN_PYTHON2)
+    False
+    >>> from doctest import Example
+    >>> example = Example('dummy', want)
+    >>> result = checker.output_difference(
+    ...     example, got, IGNORE_EXCEPTION_MODULE_IN_PYTHON2)
+    >>> output = """\
+    ... Expected:
+    ...     Traceback (most recent call last):
+    ...     foo.bar.FooBarErrorXX: requires at least one argument.
+    ... Got:
+    ...     Traceback (most recent call last):
+    ...     FooBarError: requires at least one argument.
+    ... """
+    >>> hint = """\
+    ...     ===============================================================
+    ...     HINT:
+    ...       The optionflag IGNORE_EXCEPTION_MODULE_IN_PYTHON2 is set.
+    ...       You seem to test traceback output.
+    ...       If you are indeed, make sure to use the full dotted name of
+    ...       the exception class like Python 3 displays,
+    ...       even though you are running the tests in Python 2.
+    ...       The exception message needs to be last line (and thus not
+    ...       split over multiple lines).
+    ...     ==============================================================="""
+    >>> if sys.version_info[0] < 3:
+    ...     expected = output + hint
+    ... else:
+    ...     expected = output
+    >>> result == expected
+    True
+
+
+Stack-based test setUp and tearDown
+===================================
+
+Writing doctest setUp and tearDown functions can be a bit tedious,
+especially when setUp/tearDown functions are combined.
+
+the zope.testing.setupstack module provides a small framework for
+automating test tear down.  It provides a generic setUp function that
+sets up a stack. Normal test setUp functions call this function to set
+up the stack and then use the register function to register tear-down
+functions.
+
+To see how this works we'll create a faux test:
+
+    >>> class Test:
+    ...     def __init__(self):
+    ...         self.globs = {}
+    >>> test = Test()
+
+We'll register some tearDown functions that just print something:
+
+    >>> import sys
+    >>> import zope.testing.setupstack
+    >>> zope.testing.setupstack.register(
+    ...     test, lambda : sys.stdout.write('td 1\n'))
+    >>> zope.testing.setupstack.register(
+    ...     test, lambda : sys.stdout.write('td 2\n'))
+
+Now, when we call the tearDown function:
+
+    >>> zope.testing.setupstack.tearDown(test)
+    td 2
+    td 1
+
+The registered tearDown functions are run. Note that they are run in
+the reverse order that they were registered.
+
+
+Extra positional arguments can be passed to register:
+
+    >>> zope.testing.setupstack.register(
+    ...    test, lambda x, y, z: sys.stdout.write('%s %s %s\n' % (x, y, z)),
+    ...    1, 2, z=9)
+    >>> zope.testing.setupstack.tearDown(test)
+    1 2 9
+
+
+Temporary Test Directory
+------------------------
+
+Often, tests create files as they demonstrate functionality.  They
+need to arrange for the removeal of these files when the test is
+cleaned up.
+
+The setUpDirectory function automates this.  We'll get the current
+directory first:
+
+    >>> import os
+    >>> here = os.getcwd()
+
+We'll also create a new test:
+
+    >>> test = Test()
+
+Now we'll call the setUpDirectory function:
+
+    >>> zope.testing.setupstack.setUpDirectory(test)
+
+We don't have to call zope.testing.setupstack.setUp, because
+setUpDirectory calls it for us.
+
+Now the current working directory has changed:
+
+    >>> here == os.getcwd()
+    False
+    >>> setupstack_cwd = os.getcwd()
+
+We can create files to out heart's content:
+
+    >>> with open('Data.fs', 'w') as f:
+    ...     foo = f.write('xxx')
+    >>> os.path.exists(os.path.join(setupstack_cwd, 'Data.fs'))
+    True
+
+We'll make the file read-only. This can cause problems on Windows, but
+setupstack takes care of that by making files writable before trying
+to remove them.
+
+    >>> import stat
+    >>> os.chmod('Data.fs', stat.S_IREAD)
+
+On Unix systems, broken symlinks can cause problems because the chmod
+attempt by the teardown hook will fail; let's set up a broken symlink as
+well, and verify the teardown doesn't break because of that:
+
+    >>> if sys.platform != 'win32':
+    ...     os.symlink('NotThere', 'BrokenLink')
+
+When tearDown is called:
+
+    >>> zope.testing.setupstack.tearDown(test)
+
+We'll be back where we started:
+
+    >>> here == os.getcwd()
+    True
+
+and the files we created will be gone (along with the temporary
+directory that was created:
+
+    >>> os.path.exists(os.path.join(setupstack_cwd, 'Data.fs'))
+    False
+
+Context-manager support
+-----------------------
+
+You can leverage context managers using the ``contextmanager`` method.
+The result of calling the content manager's __enter__ method will be
+returned. The context-manager's __exit__ method will be called as part
+of test tear down:
+
+    >>> class Manager(object):
+    ...     def __init__(self, *args, **kw):
+    ...         if kw:
+    ...             args += (kw, )
+    ...         self.args = args
+    ...     def __enter__(self):
+    ...         print_('enter', *self.args)
+    ...         return 42
+    ...     def __exit__(self, *args):
+    ...         print_('exit', args, *self.args)
+
+    >>> manager = Manager()
+    >>> test = Test()
+
+    >>> zope.testing.setupstack.context_manager(test, manager)
+    enter
+    42
+
+    >>> zope.testing.setupstack.tearDown(test)
+    exit (None, None, None)
+
+.. faux mock
+
+    >>> old_mock = sys.modules.get('mock')
+    >>> class FauxMock:
+    ...     @classmethod
+    ...     def patch(self, *args, **kw):
+    ...         return Manager(*args, **kw)
+
+    >>> sys.modules['mock'] = FauxMock
+
+By far the most commonly called context manager is ``mock.patch``, so
+there's a convenience function to make that simpler:
+
+    >>> zope.testing.setupstack.mock(test, 'time.time', return_value=42)
+    enter time.time {'return_value': 42}
+    42
+
+    >>> zope.testing.setupstack.tearDown(test)
+    exit (None, None, None) time.time {'return_value': 42}
+
+globs
+-----
+
+Doctests have ``globs`` attributes used to hold test globals.
+``setupstack`` was originally designed to work with doctests, but can
+now work with either doctests, or other test objects, as long as the
+test objects have either a ``globs`` attribute or a ``__dict__``
+attribute.  The ``zope.testing.setupstack.globs`` function is used to
+get the globals for a test object:
+
+    >>> zope.testing.setupstack.globs(test) is test.globs
+    True
+
+Here, because the test object had a ``globs`` attribute, it was
+returned. Because we used the test object above, it has a setupstack:
+
+    >>> '__zope.testing.setupstack' in test.globs
+    True
+
+If we remove the ``globs`` attribute, the object's instance dictionary
+will be used:
+
+    >>> del test.globs
+    >>> zope.testing.setupstack.globs(test) is test.__dict__
+    True
+    >>> zope.testing.setupstack.context_manager(test, manager)
+    enter
+    42
+
+    >>> '__zope.testing.setupstack' in test.__dict__
+    True
+
+The ``globs`` function is used internally, but can also be used by
+setup code to support either doctests or other test objects.
+
+TestCase
+--------
+
+A TestCase class is provided that:
+
+- Makes it easier to call setupstack apis, and
+
+- provides an inheritable tearDown method.
+
+In addition to a tearDown method, the class provides methods:
+
+``setupDirectory()``
+    Creates a temporary directory, runs the test, and cleans it up.
+
+``register(func)``
+    Register a tear-down function.
+
+``context_manager(manager)``
+    Enters a context manager and exits it on tearDown.
+
+``mock(*args, **kw)``
+    Enters  ``mock.patch`` with the given arguments.
+
+    This is syntactic sugur for::
+
+        context_manager(mock.patch(*args, **kw))
+
+Here's an example:
+
+    >>> open('t', 'w').close()
+
+    >>> class MyTests(zope.testing.setupstack.TestCase):
+    ...
+    ...     def setUp(self):
+    ...         self.setUpDirectory()
+    ...         self.context_manager(manager)
+    ...         self.mock("time.time", return_value=42)
+    ...
+    ...         @self.register
+    ...         def _():
+    ...             print('done w test')
+    ...
+    ...     def test(self):
+    ...         print(os.listdir('.'))
+
+.. let's try it
+
+    >>> import unittest
+    >>> loader = unittest.TestLoader()
+    >>> suite = loader.loadTestsFromTestCase(MyTests)
+    >>> result = suite.run(unittest.TestResult())
+    enter
+    enter time.time {'return_value': 42}
+    []
+    done w test
+    exit (None, None, None) time.time {'return_value': 42}
+    exit (None, None, None)
+
+.. cleanup
+
+    >>> if old_mock:
+    ...     sys.modules['mock'] = old_mock
+    ... else:
+    ...     del sys.modules['mock']
+    >>> os.remove('t')
+
+
+
+Wait until a condition holds (or until a time out)
+==================================================
+
+Often, in tests, you need to wait until some condition holds.  This
+may be because you're testing interaction with an external system or
+testing threaded (threads, processes, greenlet's, etc.) interactions.
+
+You can add sleeps to your tests, but it's often hard to know how
+long to sleep.
+
+``zope.testing.wait`` provides a convenient way to wait until
+some condition holds.  It will test a condition and, when true,
+return.  It will sleep a short time between tests.
+
+Here's a silly example, that illustrates it's use:
+
+    >>> from zope.testing.wait import wait
+    >>> wait(lambda : True)
+
+Since the condition we passed is always True, it returned
+immediately.  If the condition doesn't hold, then we'll get a timeout:
+
+    >>> wait((lambda : False), timeout=.01)
+    Traceback (most recent call last):
+    ...
+    TimeOutWaitingFor: <lambda>
+
+``wait`` has some keyword options:
+
+timeout
+   How long, in seconds, to wait for the condition to hold
+
+   Defaults to 9 seconds.
+
+wait
+   How long to wait between calls.
+
+   Defaults to .01 seconds.
+
+message
+   A message (or other data) to pass to the timeout exception.
+
+   This defaults to ``None``.  If this is false, then the callable's
+   doc string or ``__name__`` is used.
+
+``wait`` can be used as a decorator:
+
+    >>> @wait
+    ... def ok():
+    ...     return True
+
+    >>> @wait(timeout=.01)
+    ... def no_way():
+    ...     pass
+    Traceback (most recent call last):
+    ...
+    TimeOutWaitingFor: no_way
+
+    >>> @wait(timeout=.01)
+    ... def no_way():
+    ...     "never true"
+    Traceback (most recent call last):
+    ...
+    TimeOutWaitingFor: never true
+
+.. more tests
+
+    >>> import time
+    >>> now = time.time()
+    >>> @wait(timeout=.01, message='dang')
+    ... def no_way():
+    ...     "never true"
+    Traceback (most recent call last):
+    ...
+    TimeOutWaitingFor: dang
+
+    >>> .01 < (time.time() - now) < .03
+    True
+
+
+Customization
+-------------
+
+``wait`` is an instance of ``Wait``.  With ``Wait``,
+you can create you're own custom ``wait`` utilities.  For
+example, if you're testing something that uses getevent, you'd want to
+use gevent's sleep function:
+
+    >>> import zope.testing.wait
+    >>> wait = zope.testing.wait.Wait(getsleep=lambda : gevent.sleep)
+
+Wait takes a number of customization parameters:
+
+exception
+  Timeout exception class
+
+getnow
+  Function used to get a function for getting the current time.
+
+  Default: lambda : time.time
+
+getsleep
+  Function used to get a sleep function.
+
+  Default: lambda : time.sleep
+
+timeout
+  Default timeout
+
+  Default: 9
+
+wait
+  Default time to wait between attempts
+
+  Default: .01
+
+
+.. more tests
+
+    >>> def mysleep(t):
+    ...     print_('mysleep', t)
+    ...     time.sleep(t)
+
+    >>> def mynow():
+    ...     print_('mynow')
+    ...     return time.time()
+
+    >>> wait = zope.testing.wait.Wait(
+    ...    getnow=(lambda : mynow), getsleep=(lambda : mysleep),
+    ...    exception=ValueError, timeout=.1, wait=.02)
+
+    >>> @wait
+    ... def _(state=[]):
+    ...     if len(state) > 1:
+    ...        return True
+    ...     state.append(0)
+    mynow
+    mysleep 0.02
+    mynow
+    mysleep 0.02
+
+    >>> @wait(wait=.002)
+    ... def _(state=[]):
+    ...     if len(state) > 1:
+    ...        return True
+    ...     state.append(0)
+    mynow
+    mysleep 0.002
+    mynow
+    mysleep 0.002
+
+    >>> @wait(timeout=0)
+    ... def _(state=[]):
+    ...     if len(state) > 1:
+    ...        return True
+    ...     state.append(0)
+    Traceback (most recent call last):
+    ...
+    ValueError: _
+
+    >>> wait = zope.testing.wait.Wait(timeout=0)
+    >>> @wait(timeout=0)
+    ... def _(state=[]):
+    ...     if len(state) > 1:
+    ...        return True
+    ...     state.append(0)
+    Traceback (most recent call last):
+    ...
+    TimeOutWaitingFor: _
+
+
+Doctests in TestCase classes
+============================
+
+The original ``doctest`` unittest integration was based on
+``unittest`` test suites, which have fallen out of favor. This module
+provides a way to define doctests inside of unittest ``TestCase``
+classes. It provides better integration with unittest test fixtures,
+because doctests use setup provided by the containing test case
+class. It provides access to unittest assertion methods.
+
+You can define doctests in multiple ways:
+
+- references to named files
+
+- strings
+
+- decorated functions with docstrings
+
+- reference to named files decorating test-specific setup functions
+
+- reference to named files decorating a test class
+
+.. some setup
+
+   >>> __name__ = 'tests'
+
+Here are some examples::
+
+    >>> from zope.testing import doctestcase
+    >>> import doctest
+    >>> import unittest
+
+    >>> g = 'global'
+
+    >>> class MyTest(unittest.TestCase):
+    ...
+    ...     def setUp(self):
+    ...         self.a = 1
+    ...         self.globs = dict(c=9)
+    ...
+    ...     test1 = doctestcase.file('test-1.txt', optionflags=doctest.ELLIPSIS)
+    ...
+    ...     test2 = doctestcase.docteststring('''
+    ...       >>> self.a, g, c
+    ...       (1, 'global', 9)
+    ...     ''')
+    ...
+    ...     @doctestcase.doctestmethod(optionflags=doctest.ELLIPSIS)
+    ...     def test3(self):
+    ...         '''
+    ...         >>> self.a, self.x, g, c
+    ...         (1, 3, 'global', 9)
+    ...         '''
+    ...         self.x = 3
+    ...
+    ...     @doctestcase.doctestfile('test4.txt')
+    ...     def test4(self):
+    ...         self.x = 5
+
+    >>> import sys
+
+    >>> @doctestcase.doctestfiles('loggingsupport.txt', 'renormalizing.txt')
+    ... class MoreTests(unittest.TestCase):
+    ...
+    ...    def setUp(self):
+    ...        def print_(*args):
+    ...            sys.stdout.write(' '.join(map(str, args))+'\n')
+    ...        self.globs = dict(print_=print_)
+
+
+.. We can run these tests with the ``unittest`` test runner.
+
+    >>> loader = unittest.TestLoader()
+    >>> sys.stdout.writeln = lambda s: sys.stdout.write(s+'\n')
+    >>> suite = loader.loadTestsFromTestCase(MyTest)
+    >>> result = suite.run(unittest.TextTestResult(sys.stdout, True, 3))
+    test1 (tests.MyTest) ... ok
+    test2 (tests.MyTest) ... ok
+    test3 (tests.MyTest) ... ok
+    test4 (tests.MyTest) ... ok
+
+    >>> suite = loader.loadTestsFromTestCase(MoreTests)
+    >>> result = suite.run(unittest.TextTestResult(sys.stdout, True, 3))
+    test_loggingsupport (tests.MoreTests) ... ok
+    test_renormalizing (tests.MoreTests) ... ok
+
+    >>> for _, e in result.errors:
+    ...     print(e); print
+
+    Check meta data:
+
+    >>> MyTest.test1.__name__
+    'test_1'
+    >>> import os, zope.testing
+    >>> (MyTest.test1.filepath ==
+    ...  os.path.join(os.path.dirname(zope.testing.__file__), 'test-1.txt'))
+    True
+    >>> MyTest.test1.filename
+    'test-1.txt'
+
+    >>> MyTest.test3.__name__
+    'test3'
+    >>> MyTest.test4.__name__
+    'test4'
+
+    >>> (MyTest.test4.filepath ==
+    ...  os.path.join(os.path.dirname(zope.testing.__file__), 'test4.txt'))
+    True
+    >>> MyTest.test4.filename
+    'test4.txt'
+
+    >>> MoreTests.test_loggingsupport.__name__
+    'test_loggingsupport'
+    >>> MoreTests.test_loggingsupport.filename
+    'loggingsupport.txt'
+    >>> (MoreTests.test_loggingsupport.filepath ==
+    ...  os.path.join(os.path.dirname(zope.testing.__file__),
+    ...               'loggingsupport.txt'))
+    True
+
+In these examples, 4 constructors were used:
+
+doctestfile (alias: file)
+  doctestfile makes a file-based test case.
+
+  This can be used as a decorator, in which case, the decorated
+  function is called before the test is run, to provide test-specific
+  setup.
+
+doctestfiles (alias: files)
+  doctestfiles makes file-based test cases and assigns them to the
+  decorated class.
+
+  Multiple files can be specified and the resulting doctests are added
+  as members of the decorated class.
+
+docteststring (alias string)
+  docteststring constructs a doctest from a string.
+
+doctestmethod (alias method)
+  doctestmethod constructs a doctest from a method.
+
+  The method's docstring provides the test. The method's body provides
+  optional test-specific setup.
+
+Note that short aliases are provided, which maye be useful in certain
+import styles.
+
+Tests have access to the following data:
+
+- Tests created with the ``docteststring`` and ``doctestmethod``
+  constructors have access to the module globals of the defining
+  module.
+
+- In tests created with the ``docteststring`` and ``doctestmethod``
+  constructors, the test case instance is available as the ``self``
+  variable.
+
+- In tests created with the ``doctestfile`` and ``doctestfiles``
+  constructor, the test case instance is available as the ``test``
+  variable.
+
+- If a test case defines a globs attribute, it must be a dictionary
+  and it's contents are added to the test globals.
+
+The constructors accept standard doctest ``optionflags`` and
+``checker`` arguments.
+
+Note that the doctest IGNORE_EXCEPTION_DETAIL option flag is
+added to optionflags.
+
+When using ``doctestfile`` and ``doctestfile``, ``filename`` and
+``filepath`` attributes are available that contain the test file name
+and full path.
+
+``__name__`` attributes of class members
+----------------------------------------
+
+Class members have ``__name__`` attributes set as follows:
+
+- When using ``doctestmethod`` or ``doctestfile`` with a setup
+  function, ``__name__`` attribute is set to the name of the function.
+  A ``test_`` prefix is added, if the name doesn't start with ``test``.
+
+- When ``doctestfile`` is used without a setup function or when
+  ``doctestfiles`` is used, ``__name__`` is set to the last part of the
+  file path with the extension removed and non-word characters
+  converted to underscores. For example, with a test path of
+  ``'/foo/bar/test-it.rst'``, the ``__name__`` attribute is set to
+  ``'test_it'``.  A ``test_`` prefix is added, if the name doesn't
+  start with ``test``.
+
+- when using ``docteststring``, a ``name`` option can be passed in to
+  set ``__name__``.  A ``test_`` prefix is added, if the name doesn't
+  start with ``test``.
+
+The ``__name__`` attribute is important when using nose, because nose
+discovers tests as class members using their ``__name__`` attributes,
+whereas the unittest and py.test test runners use class dictionary keys.
+
+.. Let's look at some failure cases:
+
+    >>> class MyTest(unittest.TestCase):
+    ...
+    ...     test2 = doctestcase.string('''
+    ...     >>> 1
+    ...     1
+    ...     >>> 1 + 1
+    ...     1
+    ...     ''', name='test2')
+    ...
+    ...     @doctestcase.method
+    ...     def test3(self):
+    ...         '''
+    ...         >>> self.x
+    ...         3
+    ...         >>> 1 + 1
+    ...         1
+    ...         '''
+    ...         self.x = 3
+    ...
+    ...     @doctestcase.file('test4f.txt')
+    ...     def test4(self):
+    ...         self.x = 5
+
+    >>> suite = loader.loadTestsFromTestCase(MyTest)
+    >>> result = suite.run(unittest.TextTestResult(sys.stdout, True, 1))
+    FFF
+    >>> for c, e in result.failures:
+    ...     print(e) # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+    Traceback (most recent call last):
+      ...
+    ...: Failed doctest test for <string>
+      File "<string>", line 0, in <string>
+    <BLANKLINE>
+    ----------------------------------------------------------------------
+    File "<string>", line 4, in <string>
+    Failed example:
+        1 + 1
+    Expected:
+        1
+    Got:
+        2
+    <BLANKLINE>
+    <BLANKLINE>
+    Traceback (most recent call last):
+      ...
+    ...: Failed doctest test for test3
+      File "None", line 10, in test3
+    <BLANKLINE>
+    ----------------------------------------------------------------------
+    Line 4, in test3
+    Failed example:
+        1 + 1
+    Expected:
+        1
+    Got:
+        2
+    <BLANKLINE>
+    <BLANKLINE>
+    Traceback (most recent call last):
+    ...
+    ...: Failed doctest test for test4f.txt
+      File "...test4f.txt", line 0, in txt
+    <BLANKLINE>
+    ----------------------------------------------------------------------
+    File "...test4f.txt", line 3, in test4f.txt
+    Failed example:
+        1 + 1
+    Expected:
+        1
+    Got:
+        2
+    <BLANKLINE>
+    <BLANKLINE>
+
+    Check string meta data:
+
+    >>> MyTest.test2.__name__
+    'test2'
+
+.. Verify setting optionflags and checker
+
+    >>> class EasyChecker:
+    ...     def check_output(self, want, got, optionflags):
+    ...         return True
+    ...     def output_difference(self, example, got, optionflags):
+    ...         return ''
+
+    >>> class MyTest(unittest.TestCase):
+    ...
+    ...     test2 = doctestcase.string('''
+    ...     >>> 1
+    ...     2
+    ...     ''', checker=EasyChecker())
+    ...
+    ...     @doctestcase.method(optionflags=doctest.ELLIPSIS)
+    ...     def test3(self):
+    ...         '''
+    ...         >>> 'Hello'
+    ...         '...'
+    ...         '''
+    ...
+    ...     @doctestcase.file('test4e.txt', optionflags=doctest.ELLIPSIS)
+    ...     def test4(self):
+    ...         self.x = 5
+
+    >>> suite = loader.loadTestsFromTestCase(MyTest)
+    >>> result = suite.run(unittest.TextTestResult(sys.stdout, True, 2))
+    test2 (tests.MyTest) ... ok
+    test3 (tests.MyTest) ... ok
+    test4 (tests.MyTest) ... ok
+
+.. test __name__ variations
+
+    >>> class MyTest(unittest.TestCase):
+    ...
+    ...     foo = doctestcase.string('''>>> 1''', name='foo')
+    ...
+    ...     @doctestcase.method
+    ...     def bar(self):
+    ...         '''
+    ...         >>> self.x
+    ...         3
+    ...         '''
+    ...     @doctestcase.file('test4f.txt')
+    ...     def baz(self):
+    ...         pass
+    ...     wait = doctestcase.file('wait.txt')
+
+    >>> MyTest.foo.__name__
+    'test_foo'
+    >>> MyTest.bar.__name__
+    'test_bar'
+    >>> MyTest.baz.__name__
+    'test_baz'
+    >>> MyTest.wait.__name__
+    'test_wait'
+
+
+Changes
+=======
+
+4.7 (2018-10-04)
+----------------
+
+- Added support for Python 3.7.
+
+
+4.6.2 (2017-06-12)
+------------------
+
+- Remove dependencies on ``zope.interface`` and ``zope.exceptions``;
+  they're not used here.
+
+- Remove use of 2to3 for outdated versions of PyPy3, letting us build
+  universal wheels.
+
+
+4.6.1 (2017-01-04)
+------------------
+
+- Add support for Python 3.6.
+
+
+4.6.0 (2016-10-20)
+------------------
+
+- Introduce option flag ``IGNORE_EXCEPTION_MODULE_IN_PYTHON2`` to normalize
+  exception class names in traceback output. In Python 3 they are displayed as
+  the full dotted name. In Python 2 they are displayed as "just" the class
+  name.  When running doctests in Python 3, the option flag will not have any
+  effect, however when running the same test in Python 2, the segments in the
+  full dotted name leading up to the class name are stripped away from the
+  "expected" string.
+
+- Drop support for Python 2.6 and 3.2.
+
+- Add support for Python 3.5.
+
+- Cleaned up useless 2to3 conversion.
+
+4.5.0 (2015-09-02)
+------------------
+
+- Added meta data for test case methods created with
+  ``zope.testing.doctestcase``.
+
+  - Reasonable values for ``__name__``, making sure that ``__name__``
+    starts with ``test``.
+
+  - For ``doctestfile`` methods, provide ``filename`` and ``filepath``
+    attributes.
+
+  The meta data us useful, for example, for selecting tests with the
+  nose attribute mechanism.
+
+- Added ``doctestcase.doctestfiles``
+
+  - Define multiple doctest files at once.
+
+  - Automatically assign test class members.  So rather than::
+
+      class MYTests(unittest.TestCase):
+          ...
+          test_foo = doctestcase.doctestfile('foo.txt')
+
+    You can use::
+
+      @doctestcase.doctestfiles('foo.txt', 'bar.txt', ...)
+      class MYTests(unittest.TestCase):
+          ...
+
+4.4.0 (2015-07-16)
+------------------
+
+- Added ``zope.testing.setupstack.mock`` as a convenience function for
+  setting up mocks in tests.  (The Python ``mock`` package must be in
+  the path for this to work. The excellent ``mock`` package isn't a
+  dependency of ``zope.testing``.)
+
+- Added the base class ``zope.testing.setupstack.TestCase`` to make it
+  much easier to use ``zope.testing.setupstack`` in ``unittest`` test
+  cases.
+
+
+4.3.0 (2015-07-15)
+------------------
+
+- Added support for creating doctests as methods of
+  ``unittest.TestCase`` classes so that they can found automatically
+  by test runners, like *nose* that ignore test suites.
+
+4.2.0 (2015-06-01)
+------------------
+
+- **Actually** remove long-deprecated ``zope.testing.doctest`` (announced as
+  removed in 4.0.0) and ``zope.testing.doctestunit``.
+
+- Add support for PyPy and PyPy3.
+
+4.1.3 (2014-03-19)
+------------------
+
+- Add support for Python 3.4.
+
+- Update ``boostrap.py`` to version 2.2.
+
+4.1.2 (2013-02-19)
+------------------
+
+- Adjust Trove classifiers to reflect the currently supported Python
+  versions. Officially drop Python 2.4 and 2.5. Add Python 3.3.
+
+- LP: #1055720: Fix failing test on Python 3.3 due to changed exception
+  messaging.
+
+4.1.1 (2012-02-01)
+------------------
+
+- Fix: Windows test failure.
+
+4.1.0 (2012-01-29)
+------------------
+
+- Add context-manager support to ``zope.testing.setupstack``
+
+- Make ``zope.testing.setupstack`` usable with all tests, not just
+  doctests and added ``zope.testing.setupstack.globs``, which makes it
+  easier to write test setup code that workes with doctests and other
+  kinds of tests.
+
+- Add the ``wait`` module, which makes it easier to deal with
+  non-deterministic timing issues.
+
+- Rename ``zope.testing.renormalizing.RENormalizing`` to
+  ``zope.testing.renormalizing.OutputChecker``. The old name is an
+  alias.
+
+- Update tests to run with Python 3.
+
+- Label more clearly which features are supported by Python 3.
+
+- Reorganize documentation.
+
+4.0.0 (2011-11-09)
+------------------
+
+- Remove the deprecated ``zope.testing.doctest``.
+
+- Add Python 3 support.
+
+- Fix test which fails if there is a file named `Data.fs` in the current
+  working directory.
+
+
+3.10.2 (2010-11-30)
+-------------------
+
+- Fix test of broken symlink handling to not break on Windows.
+
+
+3.10.1 (2010-11-29)
+-------------------
+
+- Fix removal of broken symlinks on Unix.
+
+
+3.10.0 (2010-07-21)
+-------------------
+
+- Remove ``zope.testing.testrunner``, which now is moved to zope.testrunner.
+
+- Update fix for LP #221151 to a spelling compatible with Python 2.4.
+
+3.9.5 (2010-05-19)
+------------------
+
+- LP #579019: When layers are run in parallel, ensure that each ``tearDown``
+  is called, including the first layer which is run in the main
+  thread.
+
+- Deprecate ``zope.testing.testrunner`` and ``zope.testing.exceptions``.
+  They have been moved to a separate zope.testrunner module, and will be
+  removed from zope.testing in 4.0.0, together with ``zope.testing.doctest``.
+
+3.9.4 (2010-04-13)
+------------------
+
+- LP #560259: Fix subunit output formatter to handle layer setup
+  errors.
+
+- LP #399394:  Add a ``--stop-on-error`` / ``--stop`` / ``-x`` option to
+  the testrunner.
+
+- LP #498162:  Add a ``--pdb`` alias for the existing ``--post-mortem``
+  / ``-D`` option to the testrunner.
+
+- LP #547023:  Add a ``--version`` option to the testrunner.
+
+- Add tests for LP #144569 and #69988.
+
+  https://bugs.launchpad.net/bugs/69988
+
+  https://bugs.launchpad.net/zope3/+bug/144569
+
+
+3.9.3 (2010-03-26)
+------------------
+
+- Remove import of ``zope.testing.doctest`` from ``zope.testing.renormalizer``.
+
+- Suppress output to ``sys.stderr`` in ``testrunner-layers-ntd.txt``.
+
+- Suppress ``zope.testing.doctest`` deprecation warning when running
+  our own test suite.
+
+
+3.9.2 (2010-03-15)
+------------------
+
+- Fix broken ``from zope.testing.doctest import *``
+
+3.9.1 (2010-03-15)
+------------------
+
+- No changes; reupload to fix broken 3.9.0 release on PyPI.
+
+3.9.0 (2010-03-12)
+------------------
+
+- Modify the testrunner to use the standard Python ``doctest`` module instead
+  of the deprecated ``zope.testing.doctest``.
+
+- Fix ``testrunner-leaks.txt`` to use the ``run_internal`` helper, so that
+  ``sys.exit`` isn't triggered during the test run.
+
+- Add support for conditionally using a subunit-based output
+  formatter upon request if subunit and testtools are available. Patch
+  contributed by Jonathan Lange.
+
+3.8.7 (2010-01-26)
+------------------
+
+- Downgrade the ``zope.testing.doctest`` deprecation warning into a
+  PendingDeprecationWarning.
+
+3.8.6 (2009-12-23)
+------------------
+
+- Add ``MANIFEST.in`` and reupload to fix broken 3.8.5 release on PyPI.
+
+
+3.8.5 (2009-12-23)
+------------------
+
+- Add back ``DocFileSuite``, ``DocTestSuite``, ``debug_src`` and ``debug``
+  BBB imports back into ``zope.testing.doctestunit``; apparently many packages
+  still import them from there!
+
+- Deprecate ``zope.testing.doctest`` and ``zope.testing.doctestunit``
+  in favor of the stdlib ``doctest`` module.
+
+
+3.8.4 (2009-12-18)
+------------------
+
+- Fix missing imports and undefined variables reported by pyflakes,
+  adding tests to exercise the blind spots.
+
+- Cleaned up unused imports reported by pyflakes.
+
+- Add two new options to generate randomly ordered list of tests and to
+  select a specific order of tests.
+
+- Allow combining RENormalizing checkers via ``+`` now:
+  ``checker1 + checker2`` creates a checker with the transformations of both
+  checkers.
+
+- Fix tests under Python 2.7.
+
+3.8.3 (2009-09-21)
+------------------
+
+- Fix test failures due to using ``split()`` on filenames when running from a
+  directory with spaces in it.
+
+- Fix testrunner behavior on Windows for ``-j2`` (or greater) combined with
+  ``-v`` (or greater).
+
+3.8.2 (2009-09-15)
+------------------
+
+- Remove hotshot profiler when using Python 2.6. That makes zope.testing
+  compatible with Python 2.6
+
+
+3.8.1 (2009-08-12)
+------------------
+
+- Avoid hardcoding ``sys.argv[0]`` as script;
+  allow, for instance, Zope 2's `bin/instance test` (LP#407916).
+
+- Produce a clear error message when a subprocess doesn't follow the
+  ``zope.testing.testrunner`` protocol (LP#407916).
+
+- Avoid unnecessarily squelching verbose output in a subprocess when there are
+  not multiple subprocesses.
+
+- Avoid unnecessarily batching subprocess output, which can stymie automated
+  and human processes for identifying hung tests.
+
+- Include incremental output when there are multiple subprocesses and a
+  verbosity of ``-vv`` or greater is requested.  This again is not batched,
+  supporting automated processes and humans looking for hung tests.
+
+
+3.8.0 (2009-07-24)
+------------------
+
+- Allow testrunner to include descendants of ``unittest.TestCase`` in test
+  modules, which no longer need to provide ``test_suite()``.
+
+
+3.7.7 (2009-07-15)
+------------------
+
+- Clean up support for displaying tracebacks with supplements by turning it
+  into an always-enabled feature and making the dependency on
+  ``zope.exceptions`` explicit.
+
+- Fix #251759: prevent the testrunner descending into directories that
+  aren't Python packages.
+
+- Code cleanups.
+
+
+3.7.6 (2009-07-02)
+------------------
+
+- Add zope-testrunner ``console_scripts`` entry point. This exposes a
+  ``zope-testrunner`` script with default installs allowing the testrunner
+  to be run from the command line.
+
+3.7.5 (2009-06-08)
+------------------
+
+- Fix bug when running subprocesses on Windows.
+
+- The option ``REPORT_ONLY_FIRST_FAILURE`` (command line option "-1") is now
+  respected even when a doctest declares its own ``REPORTING_FLAGS``, such as
+  ``REPORT_NDIFF``.
+
+- Fix bug that broke readline with pdb when using doctest
+  (see http://bugs.python.org/issue5727).
+
+- Make tests pass on Windows and Linux at the same time.
+
+
+3.7.4 (2009-05-01)
+------------------
+
+- Filenames of doctest examples now contain the line number and not
+  only the example number. So a stack trace in pdb tells the exact
+  line number of the current example. This fixes
+  https://bugs.launchpad.net/bugs/339813
+
+- Colorization of doctest output correctly handles blank lines.
+
+
+3.7.3 (2009-04-22)
+------------------
+
+- Improve handling of rogue threads:  always exit with status so even
+  spinning daemon threads won't block the runner from exiting. This deprecated
+  the ``--with-exit-status`` option.
+
+
+3.7.2 (2009-04-13)
+------------------
+
+- Fix test failure on Python 2.4 due to slight difference in the way
+  coverage is reported (__init__ files with only a single comment line are now
+  not reported)
+
+- Fix bug that caused the test runner to hang when running subprocesses (as a
+  result Python 2.3 is no longer supported).
+
+- Work around a bug in Python 2.6 (related to
+  http://bugs.python.org/issue1303673) that causes the profile tests to fail.
+
+- Add explanitory notes to ``buildout.cfg`` about how to run the tests with
+  multiple versions of Python
+
+
+3.7.1 (2008-10-17)
+------------------
+
+- The ``setupstack`` temporary directory support now properly handles
+  read-only files by making them writable before removing them.
+
+
+3.7.0 (2008-09-22)
+------------------
+
+- Add alterate setuptools / distutils commands for running all tests
+  using our testrunner.  See 'zope.testing.testrunner.eggsupport:ftest'.
+
+- Add a setuptools-compatible test loader which skips tests with layers:
+  the testrunner used by ``setup.py test`` doesn't know about them, and those
+  tests then fail.  See ``zope.testing.testrunner.eggsupport:SkipLayers``.
+
+- Add support for Jython, when a garbage collector call is sent.
+
+- Add support to bootstrap on Jython.
+
+- Fix NameError in StartUpFailure.
+
+- Open doctest files in universal mode, so that packages released on Windows
+  can be tested on Linux, for example.
+
+
+3.6.0 (2008-07-10)
+------------------
+
+- Add ``-j`` option to parallel tests run in subprocesses.
+
+- RENormalizer accepts plain Python callables.
+
+- Add ``--slow-test`` option.
+
+- Add ``--no-progress`` and ``--auto-progress`` options.
+
+- Complete refactoring of the test runner into multiple code files and a more
+  modular (pipeline-like) architecture.
+
+- Unify unit tests with the layer support by introducing a real unit test
+  layer.
+
+- Add a doctest for ``zope.testing.module``. There were several bugs
+  that were fixed:
+
+  * ``README.txt`` was a really bad default argument for the module
+    name, as it is not a proper dotted name. The code would
+    immediately fail as it would look for the ``txt`` module in the
+    ``README`` package. The default is now ``__main__``.
+
+  * The ``tearDown`` function did not clean up the ``__name__`` entry in the
+    global dictionary.
+
+- Fix a bug that caused a SubprocessError to be generated if a subprocess
+  sent any output to stderr.
+
+- Fix a bug that caused the unit tests to be skipped if run in a subprocess.
+
+
+3.5.1 (2007-08-14)
+------------------
+
+- Invoke post-mortem debugging for layer-setup failures.
+
+3.5.0 (2007-07-19)
+------------------
+
+- Ensure that the test runner works on Python 2.5.
+
+- Add support for ``cProfile``.
+
+- Add output colorizing (``-c`` option).
+
+- Add ``--hide-secondary-failures`` and ``--show-secondary-failures`` options
+  (https://bugs.launchpad.net/zope3/+bug/115454).
+
+- Fix some problems with Unicode in doctests.
+
+- Fix "Error reading from subprocess" errors on Unix-like systems.
+
+3.4 (2007-03-29)
+----------------
+
+- Add ``exit-with-status`` support (supports use with buildbot and
+  ``zc.recipe.testing``)
+
+- Add a small framework for automating set up and tear down of
+  doctest tests. See ``setupstack.txt``.
+
+- Allow ``testrunner-wo-source.txt`` and ``testrunner-errors.txt`` to run
+  within a read-only source tree.
+
+3.0 (2006-09-20)
+----------------
+
+- Update the doctest copy with text-file encoding support.
+
+- Add logging-level support to the ``loggingsuppport`` module.
+
+- At verbosity-level 1, dots are not output continuously, without any
+  line breaks.
+
+- Improve output when the inability to tear down a layer causes tests
+  to be run in a subprocess.
+
+- Make ``zope.exception`` required only if the ``zope_tracebacks`` extra is
+  requested.
+
+- Fix the test coverage. If a module, for example `interfaces`, was in an
+  ignored directory/package, then if a module of the same name existed in a
+  covered directory/package, then it was also ignored there, because the
+  ignore cache stored the result by module name and not the filename of the
+  module.
+
+2.0 (2006-01-05)
+----------------
+
+- Release a separate project corresponding to the version of ``zope.testing``
+  shipped as part of the Zope 3.2.0 release.
+
+

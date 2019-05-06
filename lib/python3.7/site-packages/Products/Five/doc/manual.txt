@@ -1,0 +1,233 @@
+===========
+Five Manual
+===========
+
+Zope interfaces
+---------------
+
+Interfaces?
+===========
+
+An interface is simply a description of what an object provides to the
+world, i.e. its public attribute and methods. It looks very much like
+a class, but contains no implementation::
+
+  from zope.interface import Interface
+
+  # by convention, all interfaces are prefixed with ``I``
+  class IElephant(Interface):
+      """An elephant is a big object that barely fits in the cupboard.
+      """
+
+      def getAngerLevel():
+          """Anger level, maximum of 100.
+
+          The longer the elephant has been in the cupboard, the angrier.
+          """
+
+      def isInCupboard():
+          """Returns true if the elephant is indeed in cupboard.
+          """
+
+      def trunkSmash(target):
+          """Smash the target with trunk.
+
+          The anger level determines the force of the hit.
+          """
+
+      def trample(target):
+          """Trample the target.
+          
+          The anger level determines the rate of flattening of the target.
+          """
+
+A concrete class somewhere can now claim that it implements the
+interface (i.e. its instance will provide the interface)::
+
+  @implementer(IElephant)
+  class PinkElephant:
+
+      def getAngerLevel(self):
+          return 0 # this elephant is peaceful
+
+      def isInCupboard(self):
+          return False # it's never in a cupboard but can be found in bottles
+
+      def trunkSmash(self, target):
+          target.tickle()
+
+      def trample(self, target):
+          target.patOnHead()
+
+Interfaces themselves are good for a number of reasons:
+
+* They provide API documentation.
+
+* They help you make explicit the design of your application,
+  hopefully improving it.
+
+* If an object provides an interface, that object is considered to be
+  a *component*. This means you can use Zope's component
+  architecture with these objects.
+
+In order to use the component architecture, you'll have to make your objects
+provide interfaces. Sometimes, you cannot change the code of class (as you are
+not the maintainer), but you still want to make it implement an
+interface. Zope provides a ZCML directive to do this::
+
+  <class class="tolkien.Oliphant">
+    <implements interface=".interfaces.IElephant" />
+  </class>
+
+Adapters
+--------
+
+From a Python programmer's perspective, the immediate thing that Five
+brings to do the table are adapters. This section goes through some
+demo code to explain how everything is tied together.
+
+Zope adapters depend on Zope interfaces. To create a Zope interface you need
+to subclass it from ``zope.interface.Interface``. Here is an example::
+
+  from zope.interface import Interface
+
+  class IMyInterface(Interface):
+      """This is an interface.
+      """
+      def someMethod():
+          """This method does amazing stuff.
+          """
+
+Now to make some class declare that it implements this interface, you
+need to use the ``implementer()`` decorator on the class::
+
+  from zope.interface import implementer
+  from interfaces import IMyInterface
+
+  @implementer(IMyInterface)
+  class MyClass(object):
+
+      def someMethod(self):
+           return "I am alive! Alive!"
+
+Now let's set up the interface that we are adapting to::
+
+  class INewInterface(Interface):
+      """The interface we adapt to.
+      """
+
+      def anotherMethod():
+          """This method does more stuff.
+          """
+
+Next we'll work on the class that implements the adapter. The
+requirement to make a class that is an adapter is very simple; you
+only need to take a context object as the constructor. The context
+object is the object being adapted. An example::
+
+  from zope.interface import implementer
+  from interfaces import INewInterface
+
+  @implementer(INewInterface)
+  class MyAdapter:
+ 
+      def __init__(self, context):
+          self.context = context
+
+      def anotherMethod(self):
+          return "We have adapted: %s" % self.context.someMethod()
+
+Next, we hook it all up using zcml. If the classes are in a module
+called ``classes.py`` and the interfaces in a module called
+``interfaces.py``, we can declare ``MyAdapter`` to be an adapter for
+``IMyInterface`` to ``INewInterface`` like this (in a file called
+``configure.zcml``)::
+
+  <configure xmlns="http://namespaces.zope.org/zope">
+
+    <adapter 
+      for=".interfaces.IMyInterface"
+      provides=".interfaces.INewInterface"
+      factory=".classes.MyAdapter" /> 
+    
+  </configure>
+
+Zope will automatically pickup ``configure.zcml`` when it's placed in
+the product's directory.  Any object that provides ``IMyInterface``
+can now be adapted to ``INewInterface``, like this::
+
+  from classes import MyClass
+  from interfaces import INewInterface
+
+  object = MyClass()
+  adapted = INewInterface(object)
+  print(adapted.anotherMethod())
+
+Views
+-----
+
+This section will give a brief introduction on how to use the Zope view system.
+
+Zope enables you to create views for your own objects, or even built-in
+Zope objects, as long as two things are the case:
+
+* The object provides a Zope interface, typically through its class.
+
+* The object (typically its class) is made traversable. This allows Zope
+  views, resources and other things to be attached to a Zope object.
+
+Typically you give your classes an interface using the ``implementer``
+decorator on the class::
+
+  @implementer(ISomeInterface)
+  class MyClass(object):
+      pass
+
+For existing objects that you cannot modify this is not
+possible. Instead, we provide a ZCML directive to accomplish this. As
+an example, to make Zope's ``Folder`` (and all its subclasses)
+implement ``IFolder`` (an interface you defined), you can do the
+following in ZCML::
+
+  <class class="OFS.Folder.Folder" 
+    <implements interface=".interfaces.IFolder" />
+  </class>
+
+Views in Zope are simple classes. The only requirements for a view class are:
+
+* They need an ``__init__()`` that take a context and a request
+  attribute. Typically this comes from a base class, such as
+  ``BrowserView``.
+
+An example of a simple view::
+ 
+  from zope.publisher.browser import BrowserView
+
+  class SimpleFolderView(BrowserView):
+
+      def eagle(self):
+          """Test
+          """
+          return "The eagle has landed: %s" % self.context.keys()
+
+Note that it is not a good idea to give a view class its own
+``index_html``, as this confuses Zope's view lookup machinery.
+
+This view uses methods in Python, but you can also use other mechanisms
+such as ``ViewPageTemplateFile``.
+
+Finally, we need to hook up the pages through ZCML::
+
+  <browser:page 
+    for=".interfaces.IFolder"
+    class=".browser.SimpleFolderView"
+    attribute="eagle"
+    name="eagle.txt"
+    permission="zope2.ViewManagementScreens"
+    />
+
+``browser`` in this refers to the XML namespace for browser related things;
+it's ``http://namespace.zope.org/browser``. ``permission`` declares the
+Zope 2 permission needs in order to access this view. The file
+``permissions.zcml`` in AccessControl contains a mapping of Zope 2 permissions
+to their zope.security names.

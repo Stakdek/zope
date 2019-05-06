@@ -1,0 +1,114 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta">
+
+  <meta:directives namespace="http://namespaces.zope.org/browser">
+
+    <!-- browser menus -->
+
+    <meta:directive
+        name="menu"
+        schema="zope.browsermenu.metadirectives.IMenuDirective"
+        handler="zope.browsermenu.metaconfigure.menuDirective"
+        />
+
+    <meta:complexDirective
+        name="menuItems"
+        schema="zope.browsermenu.metadirectives.IMenuItemsDirective"
+        handler="zope.browsermenu.metaconfigure.menuItemsDirective"
+        >
+
+      <meta:subdirective
+          name="menuItem"
+          schema="zope.browsermenu.metadirectives.IMenuItemSubdirective"
+          />
+
+    </meta:complexDirective>
+
+    <meta:directive
+        name="menuItem"
+        schema="zope.browsermenu.metadirectives.IMenuItemDirective"
+        handler="zope.browsermenu.metaconfigure.menuItemDirective"
+        />
+
+    <meta:directive
+        name="addMenuItem"
+        schema="zope.browsermenu.metadirectives.IAddMenuItemDirective"
+        handler="zope.browsermenu.metaconfigure.addMenuItem"
+        />
+
+
+    <!-- browser views -->
+
+    <meta:complexDirective
+        name="view"
+        schema=".metaconfigure.IFiveViewDirective"
+        handler=".metaconfigure.view"
+        >
+
+      <meta:subdirective
+          name="page"
+          schema="zope.browserpage.metadirectives.IViewPageSubdirective"
+          />
+
+      <meta:subdirective
+          name="defaultPage"
+          schema="zope.browserpage.metadirectives.IViewDefaultPageSubdirective"
+          />
+
+    </meta:complexDirective>
+
+    <meta:directive
+        name="defaultView"
+        schema="zope.publisher.zcml.IDefaultViewDirective"
+        handler="zope.publisher.zcml.defaultView"
+        />
+
+    <!-- browser pages -->
+
+    <meta:directive
+        name="page"
+        schema="zope.browserpage.metadirectives.IPageDirective"
+        handler=".metaconfigure.page"
+        />
+
+    <meta:complexDirective
+        name="pages"
+        schema="zope.browserpage.metadirectives.IPagesDirective"
+        handler=".metaconfigure.pages"
+        >
+
+      <meta:subdirective
+          name="page"
+          schema="zope.browserpage.metadirectives.IPagesPageSubdirective"
+          />
+
+    </meta:complexDirective>
+
+
+    <!-- browser resources -->
+
+    <meta:directive
+        name="resource"
+        schema="zope.browserresource.metadirectives.IResourceDirective"
+        handler=".metaconfigure.resource"
+        />
+
+    <meta:directive
+        name="resourceDirectory"
+        schema="zope.browserresource.metadirectives.IResourceDirectoryDirective"
+        handler=".metaconfigure.resourceDirectory"
+        />
+
+
+    <!-- misc. directives -->
+
+    <meta:directive
+        name="defaultSkin"
+        schema="zope.publisher.zcml.IDefaultSkinDirective"
+        handler="zope.publisher.zcml.defaultSkin"
+        />
+
+  </meta:directives>
+
+</configure>

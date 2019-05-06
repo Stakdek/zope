@@ -1,0 +1,335 @@
+===========
+ Skinnable
+===========
+
+Requests can provide skins. But what exactly is a skin? At the code
+level, a skin is just an interface which a request provides. Why do we
+need skins? We can use skins for registering different adapters.
+
+That's a little bit much use of the word skin. Let's explain it in more
+detail. A skin is an interface which provides an interface. This
+interface is called ISkinType. The zope.publisher right now provides
+only one specific skin type interface used in the IBrowserRequest
+implementation. This interface is called BrowserSkinType.
+
+Since the zope server provides request factories for building a request,
+each such request type could provide it's own skin type interface. This
+ensures that we can register a skin type for each request.
+
+Now let's look at a higher level. A skin is a concept which we can use
+for providing different kinds of views, templates or other adapters
+adapting a request. These skins are the key component for providing
+different kind of application layers. A skin makes it possible for
+an application to act very differently with each skin. Of course, that's
+only the case at the interaction level where the request is involved.
+But that's the case most of the time since we have a web application
+server.
+
+Another part of the skinnable concept is that an application can define
+zero or more default skins. This is done with the IDefaultSkin
+interface. Default skins can be defined for request interfaces or
+implementations. Such a default skin can get overriden in a custom
+setup. Overriding a skin can be done by using the defaultSkin directive
+offered from zope.app.publication.zcml.
+
+Why does a request need a default skin? If a request needs to provide
+some pluggable concepts that require that a default adapter is
+registered for a request, this adapter could be registered for the
+default skin. If a project likes to use another pattern and needs to
+register another request adapter, the project could register its own
+skin and register the custom adapter for this new project based skin.
+This is very handy and allows developers to skip a complete
+default-skin-based setup for a given request.
+
+In general, this means a request interface and the request class that
+implements the request interface only provides the basic API but no
+adapters if the request needs to delegate things to an adapter. For such
+a request a default skin can get defined. This default skin can provide
+all adapters which the request implementation needs to have. This gives
+us the option to replace the default skin within a custom skin and
+provide custom adapters.
+
+Our exmple will define a full request and all its components from scratch.
+it doesn't depend on IBrowserRequest. We'll use a JSON-RPC as sample like
+the z3c.jsonrpc package provides.
+
+Layers and Skins
+================
+
+We also use the term "layer" if we talk about skins. A layer or skin
+layer is an interface registered as a ISkinType without a name. Zope
+provides a traversal pattern which allows traversal to a skin within a
+skin namespace called ``skin``. This allows traversal to a method called
+``applySkin`` which will apply a registered named skin. This means if we
+register an ISkinType with a name argument, we will register a skin. if
+we register a ISkinType without a name just we register a layer. This
+means, layers are not traversable ISkinType interfaces.
+
+Let's start define a request:
+
+  >>> from zope.publisher.interfaces import IRequest
+  >>> class IJSONRequest(IRequest):
+  ...     """JSON request."""
+
+And we define a skin type:
+
+  >>> from zope.publisher.interfaces import ISkinType
+  >>> class IJSONSkinType(ISkinType):
+  ...     """JSON skin type."""
+
+A request would implement the IJSONRequest interface but not the request type
+interface:
+
+  >>> import zope.interface
+  >>> from zope.publisher.base import BaseRequest
+  >>> @zope.interface.implementer(IJSONRequest)
+  ... class JSONRequest(BaseRequest):
+  ...     """JSON request implementation."""
+
+Now our request provides IJSONRequest because it implement that interface:
+
+  >>> from io import BytesIO
+  >>> request = JSONRequest(BytesIO(b''), {})
+  >>> IJSONRequest.providedBy(request)
+  True
+
+
+setDefaultSkin
+==============
+
+The default skin is a marker interface that can be registered as an
+adapter that provides IDefaultSkin for the request type. A default skin
+interface like any other skin must also provide ISkinType. This is
+important since applySkin will lookup for skins based on this type.
+
+Note: Any interfaces that are directly provided by the request coming into
+this method are replaced by the applied layer/skin interface. This is very
+important since the retry pattern can use a clean request without any
+directly provided interface after a retry gets started.
+
+If a default skin is not available, the fallback default skin is applied
+if available for the given request type. The default fallback skin is
+implemented as an named adapter factory providing IDefaultSkin and
+using ``default`` as name.
+
+Important to know is that some skin adapters get registered as interfaces
+and the fallback skins as adapters. See the defaultSkin directive in
+zope.app.publication.zcml for more information.  It registers plain
+interfaces as adapters which are not adaptable.  We have special code to
+handle this case, which we will demonstrate below.
+
+Each request can only have one (unnamed) default skin and will fallback to
+the named (default) fallback skin if available.
+
+Only the IBrowserRequest provides such a default fallback adapter. This
+adapter will apply the IDefaultBrowserLayer if no explicit default skin
+is registered for IBrowserRequest.
+
+Our test setup requires a custom default layer which we will apply to our
+request. Let's define a custm layer:
+
+  >>> class IJSONDefaultLayer(zope.interface.Interface):
+  ...     """JSON default layyer."""
+
+To illustrate, we'll first use setDefaultSkin without a registered
+IDefaultSkin adapter:
+
+  >>> IJSONDefaultLayer.providedBy(request)
+  False
+
+If we try to set a default skin and no one exist we will not fail but
+nothing happens
+
+  >>> from zope.publisher.skinnable import setDefaultSkin
+  >>> setDefaultSkin(request)
+
+Make sure our IJSONDefaultLayer provides the ISkinType interface.
+This is normaly done in a configure.zcml using the interface directive:
+
+  >>> ISkinType.providedBy(IJSONDefaultLayer)
+  False
+
+  >>> zope.interface.alsoProvides(IJSONDefaultLayer, ISkinType)
+  >>> ISkinType.providedBy(IJSONDefaultLayer)
+  True
+
+Now let's examine what can happen with our legacy case: an interface is
+registered as an adapter.
+
+  >>> from zope.publisher.interfaces import IDefaultSkin
+  >>> sm = zope.component.getSiteManager()
+  >>> sm.registerAdapter(
+  ...     IJSONDefaultLayer, (IJSONRequest,), IDefaultSkin, name='default')
+  >>> request = JSONRequest(BytesIO(b''), {})
+  >>> IJSONDefaultLayer.providedBy(request)
+  False
+  >>> setDefaultSkin(request)
+  >>> IJSONDefaultLayer.providedBy(request)
+  True
+
+What if the request already provides the interface?
+
+  >>> IJSONDefaultLayer.providedBy(request)
+  True
+  >>> setDefaultSkin(request)
+  >>> IJSONDefaultLayer.providedBy(request)
+  True
+
+Now let's define a default skin adapter which the setDefaultSkin can use. This
+adapter return our IJSONDefaultLayer. We also register this adapter within
+``default`` as name:
+
+  >>> def getDefaultJSONLayer(request):
+  ...     return IJSONDefaultLayer
+
+  >>> zope.component.provideAdapter(getDefaultJSONLayer,
+  ...     (IJSONRequest,), IDefaultSkin, name='default')
+
+  >>> setDefaultSkin(request)
+  >>> IJSONDefaultLayer.providedBy(request)
+  True
+
+When we register a default skin, without that the skin provides an ISkinType,
+the setDefaultSkin will raise a TypeError:
+
+
+  >>> from zope.interface import Interface
+  >>> class IMySkin(Interface):
+  ...     pass
+  >>> zope.component.provideAdapter(IMySkin, (IJSONRequest,), IDefaultSkin)
+  >>> setDefaultSkin(request)
+  Traceback (most recent call last):
+  ...
+  TypeError: Skin interface <InterfaceClass __builtin__.IMySkin> doesn't provide ISkinType
+
+The default skin must provide ISkinType:
+
+  >>> zope.interface.alsoProvides(IMySkin, ISkinType)
+  >>> ISkinType.providedBy(IMySkin)
+  True
+
+setDefaultSkin uses the custom layer interface instead of IJSONDefaultLayer:
+
+  >>> request = JSONRequest(BytesIO(b''), {})
+  >>> IMySkin.providedBy(request)
+  False
+
+  >>> IJSONDefaultLayer.providedBy(request)
+  False
+
+  >>> setDefaultSkin(request)
+
+  >>> IMySkin.providedBy(request)
+  True
+
+  >>> IJSONDefaultLayer.providedBy(request)
+  False
+
+Any interfaces that are directly provided by the request coming into this
+method are replaced by the applied layer/skin interface. This is important
+for our retry pattern which will ensure that we start with a clean request:
+
+  >>> request = JSONRequest(BytesIO(b''), {})
+  >>> class IFoo(Interface):
+  ...     pass
+
+  >>> zope.interface.directlyProvides(request, IFoo)
+  >>> IFoo.providedBy(request)
+  True
+
+  >>> setDefaultSkin(request)
+  >>> IFoo.providedBy(request)
+  False
+
+
+applySkin
+=========
+
+The applySkin method is able to apply any given skin. Let's define some custom
+skins:
+
+  >>> import pprint
+  >>> from zope.interface import Interface
+  >>> class ISkinA(Interface):
+  ...     pass
+
+  >>> zope.interface.directlyProvides(ISkinA, ISkinType)
+  >>> class ISkinB(Interface):
+  ...     pass
+
+  >>> zope.interface.directlyProvides(ISkinB, ISkinType)
+
+Let's start with a fresh request:
+
+  >>> request = JSONRequest(BytesIO(b''), {})
+
+Now we can apply the SkinA:
+
+  >>> from zope.publisher.skinnable import applySkin
+  >>> applySkin(request, ISkinA)
+  >>> pprint.pprint(list(zope.interface.providedBy(request).interfaces()))
+  [<InterfaceClass __builtin__.ISkinA>,
+   <InterfaceClass __builtin__.IJSONRequest>,
+   <InterfaceClass zope.publisher.interfaces.IRequest>]
+
+And if we apply ISkinB, ISkinA get removed at the same time ISkinB get applied:
+
+  >>> applySkin(request, ISkinB)
+  >>> pprint.pprint(list(zope.interface.providedBy(request).interfaces()))
+  [<InterfaceClass __builtin__.ISkinB>,
+   <InterfaceClass __builtin__.IJSONRequest>,
+   <InterfaceClass zope.publisher.interfaces.IRequest>]
+
+
+setDefaultSkin and applySkin
+============================
+
+If we set a default skin and later apply a custom skin, the default skin get
+removed at the time the applySkin get called within a new ISkinType:
+
+  >>> request = JSONRequest(BytesIO(b''), {})
+
+Note, that our IMySkin is the default skin for IJSONRequest. We can aprove that
+by lookup an IDefaultSkin interface for our request:
+
+  >>> adapters = zope.component.getSiteManager().adapters
+  >>> default = adapters.lookup((zope.interface.providedBy(request),),
+  ...     IDefaultSkin, '')
+  >>> default
+  <InterfaceClass __builtin__.IMySkin>
+
+  >>> setDefaultSkin(request)
+  >>> IMySkin.providedBy(request)
+  True
+
+  >>> ISkinA.providedBy(request)
+  False
+
+Now apply our skin ISkinA. This should remove the IMySkin at the same time the
+ISkinA get applied:
+
+  >>> applySkin(request, ISkinA)
+  >>> IMySkin.providedBy(request)
+  False
+
+  >>> ISkinA.providedBy(request)
+  True
+
+
+SkinChangedEvent
+================
+
+We will use python-3 style print function, so we import it from the
+future:
+
+  >>> from __future__ import print_function
+
+Changing the skin on a request triggers the ISkinChangedEvent event:
+
+  >>> import zope.component
+  >>> from zope.publisher.interfaces import ISkinChangedEvent
+  >>> def receiveSkinEvent(event):
+  ...     print("Notified SkinEvent for: %s" % event.request.__class__.__name__)
+  >>> zope.component.provideHandler(receiveSkinEvent, (ISkinChangedEvent,))
+  >>> applySkin(request, ISkinA)
+  Notified SkinEvent for: JSONRequest

@@ -1,0 +1,6 @@
+<html>
+<body>
+<p>This is <img src="path.jpg" alt="an inline image" />
+</p>
+</body>
+</html>

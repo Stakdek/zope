@@ -1,0 +1,20 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Zope 3\n"
+"PO-Revision-Date: 2002/06/13\n"
+"Last-Translator: Zope 3 contributors\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+msgid "short_greeting"
+msgstr "Hallo!"
+
+msgid "greeting"
+msgstr "Hallo $name, wie geht es Dir?"
+
+msgid "There is one file."
+msgid_plural "There are %d files."
+msgstr[0] "Es gibt eine Datei."
+msgstr[1] "Es gibt %d Dateien."

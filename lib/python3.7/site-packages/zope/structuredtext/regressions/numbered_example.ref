@@ -1,0 +1,19 @@
+<html>
+<body>
+<p>Example In Numbered Lists</p>
+
+<ol>
+<li> This is an example:
+<pre>
+   Hi There
+</pre>
+</li>
+<li> This is another example:
+<pre>
+   Good bye.
+</pre>
+</li>
+
+</ol>
+</body>
+</html>
