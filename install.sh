@@ -82,6 +82,7 @@ bin/pip install -e custom-products/perfact-zodbsync
 echo "Recreating zeo and wsgiinstance"
 bin/mkzeoinstance zeo 127.0.0.1:9011
 bin/mkwsgiinstance -d instance -u morty:33787951
+rm -rf custom-products/
 echo "Done. Run with runzeo and runwsgi"
 echo "now running Zope with bash startup.sh"
 bash startup.sh
