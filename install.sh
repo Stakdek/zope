@@ -1,11 +1,11 @@
 #!/bin/bash
 # set -e
 sudo apt-get install python3-dev -y
-sudo apt-get install python3.5-dev -y
-sudo apt-get install python3.5 -y
-sudo apt-get install python3.5-venv -y
+sudo apt-get install python3.7-dev -y
+sudo apt-get install python3.7 -y
+sudo apt-get install python3.7-venv -y
 cd ..
-python3.5 -m venv zope;
+python3.7 -m venv zope;
 cd zope
 pwd
 . ./bin/activate
