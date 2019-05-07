@@ -1,5 +1,9 @@
 #!/bin/bash
-set -e
+# set -e
+sudo apt-get install python3-dev -y
+sudo apt-get install python3.5-dev -y
+sudo apt-get install python3.5 -y
+sudo apt-get install python3.5-venv -y
 cd ..
 python3.5 -m venv zope;
 cd zope
@@ -7,10 +11,6 @@ pwd
 . ./bin/activate
 pwd
 bin/pip install -U pip
-sudo apt-get install python3-dev -y
-sudo apt-get install python3.5-dev -y
-sudo apt-get install python3.5 -y
-sudo apt-get install python3.5-venv -y
 bin/pip install wheel
 # tar -xzvf Zope.tar.gz
 tar -xzvf custom-products.tar.gz
@@ -71,13 +71,13 @@ bin/pip install -e custom-products/SimpleUserFolder
 
 # NOTE: Maybe use -e flag to simplify on-the-fly changes.
 echo "Install customized ZPerFactMods"
-bin/pip install -e custom-products/ZPerFactMods
+# bin/pip install -e custom-products/ZPerFactMods
 
 echo "Install customized Products.PerFactErrors"
-bin/pip install -e custom-products/Products.PerFactErrors
+# bin/pip install -e custom-products/Products.PerFactErrors
 
 echo "Install zodbsync"
-bin/pip install -e custom-products/perfact-zodbsync
+# bin/pip install -e custom-products/perfact-zodbsync
 
 echo "Recreating zeo and wsgiinstance"
 bin/mkzeoinstance zeo 127.0.0.1:9011
