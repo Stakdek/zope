@@ -4,9 +4,9 @@ sudo apt-get install python3-dev -y
 sudo apt-get install python3.7-dev -y
 sudo apt-get install python3.7 -y
 sudo apt-get install python3.7-venv -y
-sudo rm -rf Zope/ pip/
+sudo rm -rf Zope/ pip/ lib/
 cd ..
-python3.7 -m venv zope;
+python3.7 -m venv zope
 cd zope
 pwd
 . ./bin/activate
