@@ -8,6 +8,7 @@ Zope HomeApp
 
 # TODO
 Pythonize the installers!
+Either via args or via input via Terminal 
 
 # Installation WIP
 * `make install`
