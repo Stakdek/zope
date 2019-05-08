@@ -2,13 +2,12 @@
 Zope HomeApp
 
 # ISSUES
-1. Got an error in startup of Zope4. 
-1. Errors in Products.ZPsycopgDA and Products.SimpleUserFolder in startup
-1. sometimes errors in installation
+
 
 # TODO
-Pythonize the installers!
-Either via args or via input via Terminal 
+* Pythonize the installers! Either via args or via input via Terminal 
+* Autoconfigure!
+
 
 # Installation WIP
 * `make install`
