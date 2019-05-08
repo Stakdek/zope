@@ -6,6 +6,9 @@ Zope HomeApp
 1. Errors in Products.ZPsycopgDA and Products.SimpleUserFolder in startup
 1. sometimes errors in installation
 
+# TODO
+Pythonize the installers!
+
 # Installation WIP
 * `make install`
 * configure in `instance/etc/wsgi.conf` the real instance path like `…/zope/instance`
