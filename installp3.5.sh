@@ -5,9 +5,9 @@ sudo apt-get install python3.5-dev -y
 sudo apt-get install python3.5 -y
 sudo apt-get install python3.5-venv -y
 sudo rm -rf Zope/ pip/ lib/
-cd ..
-python3.5 -m venv zope
-cd zope
+#cd ..
+python3.5 -m venv app
+cd app
 pwd
 . ./bin/activate
 pwd
@@ -84,6 +84,8 @@ echo "Recreating zeo and wsgiinstance"
 bin/mkzeoinstance zeo 127.0.0.1:9011
 bin/mkwsgiinstance -d instance -u morty:33787951
 rm -rf custom-products/
+cd ..
+cp ./instance/ app/
 echo "Done. Run with runzeo and runwsgi"
 echo "now running Zope with bash startup.sh"
 bash startup.sh

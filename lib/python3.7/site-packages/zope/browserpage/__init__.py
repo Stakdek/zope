@@ -1,1 +1,0 @@
-from zope.browserpage.viewpagetemplatefile import ViewPageTemplateFile

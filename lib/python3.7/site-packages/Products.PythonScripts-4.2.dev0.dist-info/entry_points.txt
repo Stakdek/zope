@@ -1,3 +1,0 @@
-[zodbupdate.decode]
-decodes = Products.PythonScripts:zodbupdate_decode_dict
-

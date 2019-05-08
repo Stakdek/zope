@@ -1,4 +1,0 @@
-<tal:block repeat="resource view/getResources">
-<script type="text/javascript" src="some-library.js"
-        tal:attributes="src resource"> </script>
-</tal:block>

@@ -1,2 +1,0 @@
-DocumentTemplate
-TreeDisplay

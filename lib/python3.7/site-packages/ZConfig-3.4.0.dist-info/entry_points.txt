@@ -1,4 +1,0 @@
-[console_scripts]
-zconfig = ZConfig.validator:main
-zconfig_schema2html = ZConfig.schema2html:main
-
