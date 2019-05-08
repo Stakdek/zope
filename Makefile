@@ -10,7 +10,6 @@ clean:
 	rm -f *.jpeg*
 	rm -rf app
 install:
-	source settings.sh
 	bash $(INSTALL)
 start:
 	bash $(START)
