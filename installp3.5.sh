@@ -4,7 +4,7 @@ sudo apt-get install python3-dev -y
 sudo apt-get install python3.5-dev -y
 sudo apt-get install python3.5 -y
 sudo apt-get install python3.5-venv -y
-sudo rm -rf Zope/ pip/ lib/
+sudo rm -rf app/
 #cd ..
 python3.5 -m venv app
 cd app
