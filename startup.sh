@@ -1,3 +1,4 @@
+#!/bin/bash
 cd app/
 . ./bin/activate
-sudo bin/runwsgi instance/etc/zope.ini
+runwsgi instance/etc/zope.ini

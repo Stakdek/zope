@@ -1,13 +1,9 @@
 #!/bin/bash
-# set -e
-sudo apt-get install zope.deprecation
-sudo apt-get install python3-dev -y
-sudo apt-get install python3.7-dev -y
-sudo apt-get install python3.7 -y
-sudo apt-get install python3.7-venv -y
-sudo rm -rf app/
-#cd ..
-python3.7 -m venv app
+set -e
+
+source settings.sh
+
+$BASE_PYTHON -m venv app
 cd app
 pwd
 . ./bin/activate
@@ -15,18 +11,19 @@ pwd
 bin/pip install -U pip
 bin/pip install wheel
 # tar -xzvf Zope.tar.gz
-tar -xzvf custom-products.tar.gz
+tar -xzvf ../custom-products.tar.gz
 
-if [[ ! -d Zope ]]; then
-    echo "Clone Zope4"
-    git clone https://github.com/zopefoundation/Zope.git
-    ( cd Zope; git checkout 4.0b10 )
+# better use a release to safe some traffic, we do not need the whole zope
+# repository
+if [[ ! -d Zope-$ZOPE_RELEASE ]]; then
+    wget https://github.com/zopefoundation/Zope/archive/$ZOPE_RELEASE.tar.gz
+    tar -xzvf $ZOPE_RELEASE.tar.gz
 fi
 
 echo "Install Zope4 beta requirements"
 echo "Install Zope4 requirements"
 # REMARK: if this breaks, try installing python3-dev
-bin/pip install -r Zope/requirements-full.txt
+bin/pip install -r Zope-$ZOPE_RELEASE/requirements-full.txt
 
 echo "Install Products"
 bin/pip install Products.PythonScripts \
@@ -82,11 +79,11 @@ echo "Install zodbsync"
 # bin/pip install -e custom-products/perfact-zodbsync
 
 echo "Recreating zeo and wsgiinstance"
-bin/mkzeoinstance zeo 127.0.0.1:9011
-bin/mkwsgiinstance -d instance -u morty:33787951
-rm -rf custom-products/
+#bin/mkzeoinstance zeo 127.0.0.1:9011
+bin/mkwsgiinstance -d instance -u admin:admin
+rm -rf ../custom-products/
 cd ..
-cp ./instance/ app/
+cp -r ./instance/ app/
 echo "Done. Run with runzeo and runwsgi"
 echo "now running Zope with bash startup.sh"
 bash startup.sh

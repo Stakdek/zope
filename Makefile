@@ -8,7 +8,9 @@ clean:
 	rm -rf *.pyc
 	rm -rf *~*
 	rm -f *.jpeg*
+	rm -rf app
 install:
-	sudo bash $(INSTALL)
+	source settings.sh
+	bash $(INSTALL)
 start:
-	sudo bash startup.sh
+	bash $(START)
