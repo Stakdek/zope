@@ -4,6 +4,4 @@
 *.*~
 *.log
 *_BKP*
-cache
-Zope/
-custom-products/
+app/

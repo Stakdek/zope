@@ -1,5 +1,6 @@
 #!/bin/bash
 # set -e
+sudo apt-get install zope.deprecation
 sudo apt-get install python3-dev -y
 sudo apt-get install python3.5-dev -y
 sudo apt-get install python3.5 -y
