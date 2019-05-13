@@ -5,9 +5,7 @@ source settings.sh
 
 $BASE_PYTHON -m venv app
 cd app
-pwd
 . ./bin/activate
-pwd
 bin/pip install -U pip
 bin/pip install wheel
 # tar -xzvf Zope.tar.gz
@@ -34,8 +32,7 @@ bin/pip install Products.PythonScripts \
     Products.MailHost \
     psycopg2-binary \
     zope.mkzeoinstance
-pwd
-#cd zope
+
 echo "Install Products.PythonScripts"
 bin/pip install custom-products/Products.PythonScripts
 
@@ -83,7 +80,33 @@ echo "Recreating zeo and wsgiinstance"
 bin/mkwsgiinstance -d instance -u admin:admin
 rm -rf ../custom-products/
 cd ..
-cp -r ./instance/ app/
+
+
+
+if [ -z ${EXTERNAL_ZOPE_DATA} ]
+then
+    echo "No custom Zope-Repo found. Skipping…"
+else
+    # get the name from the git repo link
+    REPO_NAME=$(echo $EXTERNAL_ZOPE_DATA| cut -d'/' -f 5 | cut -d'.' -f 1)
+
+    git clone $EXTERNAL_ZOPE_DATA
+    cd $REPO_NAME
+    if [[ -d app ]]; then
+        echo "Will now install $REPO_NAME to Zope-$ZOPE_RELEASE…"
+        cp -r app/ ../
+        cd ..
+        rm -rf $REPO_NAME/
+        echo "Custom Repo installation done."
+    else
+        echo "ERROR: The Repo $REPO_NAME does not have an directory 'app'."
+        echo "This folder excepted to make sure the format of the repo is compatible with this Zope-Repo"
+        cd ..
+        rm -rf $REPO_NAME/
+    fi
+fi
+
+
 echo "Done. Run with runzeo and runwsgi"
 echo "now running Zope with bash startup.sh"
 bash startup.sh
