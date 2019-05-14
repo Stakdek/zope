@@ -66,16 +66,17 @@ echo "Install customized SimpleUserFolder"
 bin/pip install -e custom-products/SimpleUserFolder
 
 # NOTE: Maybe use -e flag to simplify on-the-fly changes.
-echo "Install customized ZPerFactMods"
+# echo "Install customized ZPerFactMods"
 # bin/pip install -e custom-products/ZPerFactMods
 
-echo "Install customized Products.PerFactErrors"
+# echo "Install customized Products.PerFactErrors"
 # bin/pip install -e custom-products/Products.PerFactErrors
 
 echo "Install zodbsync"
 # bin/pip install -e custom-products/perfact-zodbsync
+bin/pip install git+https://github.com/perfact/zodbsync
 
-echo "Recreating zeo and wsgiinstance"
+#echo "Recreating zeo and wsgiinstance"
 #bin/mkzeoinstance zeo 127.0.0.1:9011
 bin/mkwsgiinstance -d instance -u admin:admin
 rm -rf ../custom-products/
