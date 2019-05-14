@@ -90,7 +90,54 @@ return 'will not work'
 **Attention!**
 Only allow packages you really need, avoid using too many fancy python packages
 in zope python sripts. Better write a short wrapper module providing the stuff
-you need, keep such magic away from the `data.fs` !
+you need, keep such magic away from the `Data.fs` !
+
+## zodbsync usage
+
+Zope environments installed using this repo also ship with a handy tool named
+`zodbsync`. After the installation you can use it create a filesystem representation
+of the `Data.fs` which can be read using `perfact-zoperecord` and written via
+`perfact-zopeplayback`.
+
+**Stop your running zope instance,** then setup `zodbsync_config.py`, most importantly:
+
+```python
+# Path of the Zope instance configuration to use to
+wsgi_conf_path = '/path/to/this/repo/app/instance/etc/wsgi.conf'
+
+# Path to Data.fs which is needed for lookup of object IDs from transaction IDs
+# with perfact-zoperecord --watch
+datafs_path = '/path/to/this/repo/app/instance/var/Data.fs'
+
+# Base directory of the repository
+base_dir = '/place/to/keep/such/repos'
+```
+
+Then activate the zope environment and call `perfact-zoperecord` using the altered
+configuration file:
+
+```bash
+cd /path/to/this/repo/app
+. bin/activate
+perfact-zoperecord -c ../zodbsync_config.py
+```
+
+This will read the `Data.fs` of your zope instance and throw its content to the
+`base_dir` folder previously configured.
+
+Now you can alter the files created in the `base_dir` folder, use `perfact-zopeplayback`
+to push files back into the `Data.fs`:
+
+```bash
+cd /path/to/this/repo/app
+. bin/activate
+cd /place/to/keep/such/repos   # base_dir !
+perfact-zopeplayback -c /path/to/this/repo/zodbsync_config.py /
+```
+
+For a more sophisticated usage use the `-h` argument to display further help on
+these tools. For even more infos on them visit [the git repo](https://github.com/perfact/zodbsync)
+
 
 # TODO
 * Pythonize the installers! Either via args or via input via Terminal
