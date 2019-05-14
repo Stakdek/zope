@@ -1,13 +1,14 @@
 # Zope HomeApp
-Zope HomeApp
 
-# ISSUES
+Zope HomeApp is basically a Makefile and some bash scripts to build a Zope4
+instance from scratch into a python virtualenv. The Zope4 installation is
+enriched with many useful Zope Prodcuts such as `PythonScripts` or a postgresql
+database adapter.
 
+An intention of this repo is to simplify the zope environment setup and therefore
+allow easy environment buildup and teardown.
 
-# TODO
-* Pythonize the installers! Either via args or via input via Terminal
-* Autoconfigure!
-
+The created zope environment may be customized using the `settings.sh` file.
 
 # Installation WIP
 
@@ -43,13 +44,13 @@ sudo apt-get install zope.deprecation python3-dev python3.5-dev python3.5 python
 
 ### settings.sh
 
-
+This file is sourced when installation starts. Its variables are consumed in `install.sh`.
+See comments in `settings.sh` for further detaills.
 
 ## Allow custom modules in Products.PythonScripts
-This file is sourced when installation starts. Its variables are consumed in `install.sh`.
-It allows some settings like which python interpreter is used to start from.
 
-When using `ìnstall.sh` to create the environment the steps would be the following:
+The following steps describe how to setup the `PythonScripts` product to allow
+arbitrary python modules in zope python scripts.
 
 First create a new python module inside the Prodcuts folder:
 
@@ -60,9 +61,8 @@ touch GlobalModules/__init__.py
 ```
 
 This new "product" is a dummy serving as hook to call stuff from PythonScripts product.
-Insert lines from PythonScripts README and allow all kinds of security issues.
 
-I inserted the following into the `__init__.py` for testing purposes:
+Insert the following into the `__init__.py` for testing purposes:
 
 ```python
 # Global module assertions for Python scripts
@@ -87,3 +87,11 @@ import re
 return 'will not work'
 ```
 
+**Attention!**
+Only allow packages you really need, avoid using too many fancy python packages
+in zope python sripts. Better write a short wrapper module providing the stuff
+you need, keep such magic away from the `data.fs` !
+
+# TODO
+* Pythonize the installers! Either via args or via input via Terminal
+* Autoconfigure!
