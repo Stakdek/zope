@@ -47,6 +47,8 @@ sudo apt-get install zope.deprecation python3-dev python3.5-dev python3.5 python
 This file is sourced when installation starts. Its variables are consumed in `install.sh`.
 See comments in `settings.sh` for further detaills.
 
+# Zope instance setup
+
 ## Allow custom modules in Products.PythonScripts
 
 The following steps describe how to setup the `PythonScripts` product to allow
@@ -138,6 +140,51 @@ perfact-zopeplayback -c /path/to/this/repo/zodbsync_config.py /
 For a more sophisticated usage use the `-h` argument to display further help on
 these tools. For even more infos on them visit [the git repo](https://github.com/perfact/zodbsync)
 
+## Database connector setup
+
+To access your postgresql database from zope it is necessary to create a database
+connector object in zope. Log in to your zope manage environment and create a
+`Z Psycopg 2 Database Connector` object.
+
+Fill the form to configure your connector, most importantly the database
+connection string. After you created the connector you can click on it to
+open/close the connection or to change its properties.
+
+Create a simple `Z SQL Method` to test your new adapter, content may be `select now()`
+or what comes to your mind. Call the query via the Test tab, it should not crash
+and hopefully throw the correct result.
+
+Troubleshooting:
++ Watch the console your zope is running in for useful error messages
++ Make sure your connection string is correct, adapter connection must be opened
+
+When using `perfact-zopeplayback` you can even create the database connector in
+your `Data.fs` filesystem repository.
+
+```bash
+cd /path/to/repo/__root__/
+mkdir My_PSQL_Adapter  # may call it chessecake
+cd My_PSQL_Adapter
+touch __meta__  # consumed by perfact-zopeplayback to create zope objects
+```
+
+Following skeleton may be used to fill the `__meta__` file:
+
+```python
+[
+    ('autocommit', False),
+    ('connection_string', 'your connection string here!'),
+    ('encoding', ''),
+    ('owner', (['acl_users'], 'Your owner here')),
+    ('readonlymode', False),
+    ('tilevel', 2),
+    ('title', 'Useful title here'),
+    ('type', 'Z Psycopg 2 Database Connection'),
+    ('zdatetime', 'YES'),
+]
+```
+
+Then use `perfact-zopeplayback` to push the adapter into the `Data.fs`.
 
 # TODO
 * Pythonize the installers! Either via args or via input via Terminal
