@@ -185,7 +185,3 @@ Following skeleton may be used to fill the `__meta__` file:
 ```
 
 Then use `perfact-zopeplayback` to push the adapter into the `Data.fs`.
-
-# TODO
-* Pythonize the installers! Either via args or via input via Terminal
-* Autoconfigure!
