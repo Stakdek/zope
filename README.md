@@ -14,6 +14,11 @@ The created zope environment may be customized using the `settings.sh` file.
 
 ## Requirements
 
+To compile python modules during installation and to checkout git repositories:
+```bash
+sudo apt-get install build-essential git
+```
+
 Postgresql 10, default on Ubuntu 18.04:
 
 ```bash
