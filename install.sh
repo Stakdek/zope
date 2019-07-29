@@ -3,6 +3,9 @@ set -e
 
 source settings.sh
 
+echo "Installing deb requirements"
+sudo apt-get install libffi-dev
+
 $BASE_PYTHON -m venv app
 cd app
 . ./bin/activate
