@@ -1,4 +1,6 @@
 #!/bin/bash
-cd app/
+DIR="$(dirname "$(readlink -f "$0")")" # get path of script
+echo $DIR
+cd $DIR/app/
 . ./bin/activate
 runwsgi instance/etc/zope.ini
