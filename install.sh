@@ -11,20 +11,14 @@ cd app
 . ./bin/activate
 bin/pip install -U pip
 bin/pip install wheel
-# tar -xzvf Zope.tar.gz
 tar -xzvf ../custom-products.tar.gz
 
-# better use a release to safe some traffic, we do not need the whole zope
-# repository
 if [[ ! -d Zope-$ZOPE_RELEASE ]]; then
     wget https://github.com/zopefoundation/Zope/archive/$ZOPE_RELEASE.tar.gz
     tar -xzvf $ZOPE_RELEASE.tar.gz
 fi
 
-echo "Install Zope4 beta requirements"
 echo "Install Zope4 requirements"
-# REMARK: if this breaks, try installing python3-dev
-bin/pip install -r Zope-$ZOPE_RELEASE/requirements-full.txt
 
 echo "Install Products"
 bin/pip install Products.PythonScripts \
@@ -52,8 +46,6 @@ echo "Install Products.ExternalMethod"
 bin/pip install Products.ExternalMethod
 
 echo "Install Products.MailHost"
-# This should not require to set the option genericsetup. Will hopefully
-# not be necessary in some next version
 bin/pip install "Products.MailHost[genericsetup]"
 
 echo "Install psycopg2"
@@ -68,19 +60,8 @@ bin/pip install -e custom-products/ZPsycopgDA
 echo "Install customized SimpleUserFolder"
 bin/pip install -e custom-products/SimpleUserFolder
 
-# NOTE: Maybe use -e flag to simplify on-the-fly changes.
-# echo "Install customized ZPerFactMods"
-# bin/pip install -e custom-products/ZPerFactMods
-
-# echo "Install customized Products.PerFactErrors"
-# bin/pip install -e custom-products/Products.PerFactErrors
-
-echo "Install zodbsync"
-# bin/pip install -e custom-products/perfact-zodbsync
 bin/pip install git+https://github.com/perfact/zodbsync
 
-#echo "Recreating zeo and wsgiinstance"
-#bin/mkzeoinstance zeo 127.0.0.1:9011
 bin/mkwsgiinstance -d instance -u $USER_PASS
 rm -rf ../custom-products/
 cd ..
