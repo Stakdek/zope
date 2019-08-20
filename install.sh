@@ -23,6 +23,7 @@ if [[ ! -d Zope-$ZOPE_RELEASE ]]; then
 fi
 
 echo "Install Zope4 requirements"
+bin/pip install -r Zope-$ZOPE_RELEASE/requirements-full.txt || sudo apt-get install python3-dev && bin/pip install -r Zope-$ZOPE_RELEASE/requirements-full.txt
 
 echo "Install Products"
 bin/pip install Products.PythonScripts \
