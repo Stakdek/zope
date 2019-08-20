@@ -3,17 +3,21 @@ set -e
 
 source settings.sh
 
-echo "Installing deb requirements"
+echo "Installing system requirements"
 sudo apt-get install libffi-dev
 
+echo "Create virtualenv"
 $BASE_PYTHON -m venv app
 cd app
 . ./bin/activate
 bin/pip install -U pip
 bin/pip install wheel
+
+echo "Unpack customized Zope products"
 tar -xzvf ../custom-products.tar.gz
 
 if [[ ! -d Zope-$ZOPE_RELEASE ]]; then
+    echo "Download and unpack Zope-$ZOPE_RELEASE"
     wget https://github.com/zopefoundation/Zope/archive/$ZOPE_RELEASE.tar.gz
     tar -xzvf $ZOPE_RELEASE.tar.gz
 fi
@@ -33,10 +37,10 @@ bin/pip install Products.PythonScripts \
 echo "Install Products.PythonScripts"
 bin/pip install custom-products/Products.PythonScripts
 
-echo "Install customized Products.ZSQLMethods"
+echo "Install Products.ZSQLMethods"
 bin/pip install custom-products/Products.ZSQLMethods
 
-echo "Installed cloned Products.SiteErrorLog"
+echo "Installed Products.SiteErrorLog"
 bin/pip install custom-products/Products.SiteErrorLog/
 
 echo "Install Products.StandardCacheManagers"
@@ -51,17 +55,19 @@ bin/pip install "Products.MailHost[genericsetup]"
 echo "Install psycopg2"
 bin/pip install psycopg2
 
-echo "Install mkzeoinstance"
+echo "Install zope.mkzeoinstance"
 bin/pip install zope.mkzeoinstance
 
-echo "Install customized ZPsycopgDA"
+echo "Install ZPsycopgDA"
 bin/pip install -e custom-products/ZPsycopgDA
 
-echo "Install customized SimpleUserFolder"
+echo "Install SimpleUserFolder"
 bin/pip install -e custom-products/SimpleUserFolder
 
+echo "Install PerFact zodbsync"
 bin/pip install git+https://github.com/perfact/zodbsync
 
+echo "Make wsgi instance and user"
 bin/mkwsgiinstance -d instance -u $USER_PASS
 rm -rf ../custom-products/
 cd ..
@@ -91,7 +97,5 @@ else
     fi
 fi
 
-
-echo "Done. Run with runzeo and runwsgi"
-echo "now running Zope with bash startup.sh"
-bash startup.sh
+echo "now running Zope with bash startup.sh."
+sudo bash startup.sh
