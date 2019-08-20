@@ -9,3 +9,5 @@ ZOPE_RELEASE="4.1.1"
 
 # external app repository cloned into app folder after installation. optional.
 EXTERNAL_ZOPE_DATA=
+
+USER_PASS="admin:admin"

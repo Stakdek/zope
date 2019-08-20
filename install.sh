@@ -81,7 +81,7 @@ bin/pip install git+https://github.com/perfact/zodbsync
 
 #echo "Recreating zeo and wsgiinstance"
 #bin/mkzeoinstance zeo 127.0.0.1:9011
-bin/mkwsgiinstance -d instance -u admin:admin
+bin/mkwsgiinstance -d instance -u $USER_PASS
 rm -rf ../custom-products/
 cd ..
 
