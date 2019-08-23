@@ -1,8 +1,13 @@
-# Zope HomeApp
+# Zope
 
-Zope HomeApp is basically a Makefile and some bash scripts to build a Zope4
-instance from scratch into a python virtualenv. The Zope4 installation is
-enriched with many useful Zope Prodcuts such as `PythonScripts` or a postgresql
+Zope (Z Object Publishing Environment) is an object-oriented, open source,
+free web application server written in the Python programming language.
+Zope is a platform for the realization of web applications and is very well suited
+for the creation of dynamic web presences, as it is basically designed to
+separate the content from the design of the website.
+This Zope-Repo is basically a Makefile and some bash scripts to build a Zope4
+instance from scratch into a python virtualenv.
+The Zope4 installation is enriched with many useful Zope Prodcuts such as `PythonScripts` or a postgresql
 database adapter.
 
 An intention of this repo is to simplify the zope environment setup and therefore
