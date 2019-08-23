@@ -39,6 +39,14 @@ Python3.5:
 sudo apt-get install zope.deprecation python3-dev python3.5-dev python3.5 python3.5-venv
 ```
 
+If the the pip product breaks in compiling and building, this may help you.
+This is a module to ensure you can run compiled C functions which is needed to install the Products.
+For example on all Ubuntu Server LTS‘ will this happen until you install this module.
+
+```bash
+sudo apt-get install libffi-dev
+```
+
 ## Via makefile
 
 * `make install`
