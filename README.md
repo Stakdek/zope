@@ -15,7 +15,7 @@ allow easy environment buildup and teardown.
 
 The created zope environment may be customized using the `settings.sh` file.
 
-# Installation WIP
+# Installation
 
 ## Requirements
 
