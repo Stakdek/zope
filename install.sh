@@ -96,4 +96,4 @@ else
 fi
 
 echo "now running Zope with bash startup.sh."
-sudo bash startup.sh
+bash startup.sh
