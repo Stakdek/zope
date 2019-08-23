@@ -3,9 +3,6 @@ set -e
 
 source settings.sh
 
-echo "Installing system requirements"
-sudo apt-get install libffi-dev
-
 echo "Create virtualenv"
 $BASE_PYTHON -m venv app
 cd app
