@@ -22,8 +22,8 @@ By default, zope runs on localhost:9081, which can be configured to a different 
 
 If a different ip address than localhost is selected, then Zope must be started as `root`.
 
-It is recommended to use Zope as backend and run e.g. HAProxy, Apache2 or nginx in the frontend.
-If Zope runs as frontend, HTTPS connections do not work and so the connection is insecure.
+It is recommended to use Zope as Applicationserver and run e.g. HAProxy, Apache2 or nginx as Webserver.
+If Zope runs as Applicationserver and Webserver, HTTPS connections do not work and so the connection is insecure.
 
 # Installation
 
