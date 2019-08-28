@@ -213,3 +213,109 @@ Following skeleton may be used to fill the `__meta__` file:
 ```
 
 Then use `perfact-zopeplayback` to push the adapter into the `Data.fs`.
+
+## Example for HAProxy
+HAProxy is a free, very fast and reliable solution offering high availability,
+load balancing, and proxying for TCP and HTTP-based applications.
+It is particularly suited for very high traffic web sites and powers quite a number of the world's most visited ones.
+Over the years it has become the de-facto standard opensource load balancer,
+is now shipped with most mainstream Linux distributions, and is often deployed by default in cloud platforms.
+
+A config can be like this:
+
+This is a config for normal HTTP connections:
+```config
+
+global
+    maxconn 50000
+    log /dev/log local0
+    user haproxy
+    group haproxy
+    stats socket /run/haproxy/admin.sock user haproxy group haproxy mode 660 level admin
+    nbproc 2
+    nbthread 4
+    cpu-map auto:1/1-4 0-3
+    ssl-default-bind-ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256
+    ssl-default-bind-options ssl-min-ver TLSv1.2 no-tls-tickets
+
+defaults
+    timeout connect 10s
+    timeout client 30s
+    timeout server 30s
+    log global
+    mode http
+    option httplog
+    maxconn 3000
+
+frontend www-http
+    bind 10.0.0.3:80
+    default_backend zope
+
+backend zope
+    balance roundrobin
+    option httpchk HEAD /
+    default-server check maxconn 20
+    server zope localhost:9081
+```
+
+
+This is a config for HTTPS. You will need a valid certificate for HTTPS.
+```config
+global
+	log /dev/log	local0
+	log /dev/log	local1 notice
+	chroot /var/lib/haproxy
+	stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+	stats timeout 30s
+	user haproxy
+	group haproxy
+	daemon
+	maxconn 2048
+	tune.ssl.default-dh-param 2048
+
+	# Default SSL material locations
+	ca-base /etc/ssl/certs
+	crt-base /etc/ssl/private
+
+	# Default ciphers to use on SSL-enabled listening sockets.
+	ssl-default-bind-ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS
+	ssl-default-bind-options no-sslv3
+
+defaults
+	log	global
+	mode	http
+	option	httplog
+	option	dontlognull
+	option forwardfor
+	option http-server-close
+        timeout connect 5000
+        timeout client  50000
+        timeout server  50000
+	errorfile 400 /etc/haproxy/errors/400.http
+	errorfile 403 /etc/haproxy/errors/403.http
+	errorfile 408 /etc/haproxy/errors/408.http
+	errorfile 500 /etc/haproxy/errors/500.http
+	errorfile 502 /etc/haproxy/errors/502.http
+	errorfile 503 /etc/haproxy/errors/503.http
+	errorfile 504 /etc/haproxy/errors/504.http
+
+frontend www-http
+   bind *:80
+   reqadd X-Forwarded-Proto:\ http
+   default_backend zope
+
+frontend www-https
+   bind *:443 ssl crt /etc/haproxy/certs/mysite.de.pem
+   reqadd X-Forwarded-Proto:\ https
+   acl letsencrypt-acl path_beg /.well-known/acme-challenge/
+   use_backend letsencrypt-backend if letsencrypt-acl
+   default_backend zope
+
+backend zope
+   redirect scheme https if !{ ssl_fc }
+   server www-1 localhost:8080 check # Zope Applicationserver
+
+backend letsencrypt-backend
+   server letsencrypt 127.0.0.1:54321
+```
+Read more at [https://www.haproxy.com/de/blog/the-four-essential-sections-of-an-haproxy-configuration/](https://www.haproxy.com/de/blog/the-four-essential-sections-of-an-haproxy-configuration/)
