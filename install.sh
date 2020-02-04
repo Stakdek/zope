@@ -36,9 +36,6 @@ bin/pip install Products.PythonScripts \
 echo "Install Products.PluggableAuthService"
 bin/pip install Products.PluggableAuthService
 
-#echo "Install Products.Session-master"
-#bin/pip install custom-products/Products.Sessions-master
-
 echo "Install Products.PythonScripts"
 bin/pip install custom-products/Products.PythonScripts
 
