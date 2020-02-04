@@ -31,13 +31,13 @@ bin/pip install Products.PythonScripts \
     Products.MailHost \
     psycopg2-binary \
     zope.mkzeoinstance \
-    Products.Sessions-master
+    Products.Sessions
 
 echo "Install Products.PluggableAuthService"
-bin/pip install Products.PluggableAuthServiceter
+bin/pip install Products.PluggableAuthService
 
-echo "Install Products.Session-master"
-bin/pip install custom-products/Products.Sessions-master
+#echo "Install Products.Session-master"
+#bin/pip install custom-products/Products.Sessions-master
 
 echo "Install Products.PythonScripts"
 bin/pip install custom-products/Products.PythonScripts
