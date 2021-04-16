@@ -57,10 +57,10 @@ echo "Install zope.mkzeoinstance"
 bin/pip install zope.mkzeoinstance
 
 echo "Install ZPsycopgDA"
-bin/pip install -e custom-products/ZPsycopgDA
+bin/pip install git+https://github.com/perfact/ZPsycopgDA
 
 echo "Install SimpleUserFolder"
-bin/pip install -e custom-products/SimpleUserFolder
+bin/pip install git+https://github.com/perfact/SimpleUserFolder
 
 echo "Install PerFact zodbsync"
 bin/pip install git+https://github.com/perfact/zodbsync
