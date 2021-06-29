@@ -5,7 +5,8 @@
 BASE_PYTHON=/usr/bin/python3.7
 
 # zope release to be installed.
-ZOPE_RELEASE="4.1.3"
+
+ZOPE_RELEASE="4.2.1"
 
 # external app repository cloned into app folder after installation. optional.
 EXTERNAL_ZOPE_DATA=

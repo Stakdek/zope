@@ -41,11 +41,19 @@ sudo apt-get install postgresql postgresql-server-dev-10
 ```
 
 Depending on your system python3 package availability may vary:
+Do not use versions over Python3.7. Zope is not compatible with it.
 
 Python3.7:
 
 ```bash
 sudo apt-get install zope.deprecation python3-dev python3.7-dev python3.7 python3.7-venv
+```
+
+**Python3.6 or Python3.7 Ubuntu 20:**
+
+```bash
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt-get install zope.deprecation python3-dev python3.6-dev python3.6 python3.6-venv
 ```
 
 Python3.5:
