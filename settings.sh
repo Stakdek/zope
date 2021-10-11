@@ -12,3 +12,6 @@ ZOPE_RELEASE="4.2.1"
 EXTERNAL_ZOPE_DATA=
 
 USER_PASS="admin:admin"
+
+# this creates n wsgi instances
+WSGI_INSTANCES=1

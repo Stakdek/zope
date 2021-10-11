@@ -69,8 +69,12 @@ bin/pip install git+https://github.com/perfact/SimpleUserFolder
 echo "Install PerFact zodbsync"
 bin/pip install git+https://github.com/perfact/zodbsync
 
-echo "Make wsgi instance and user"
-bin/mkwsgiinstance -d instance -u $USER_PASS
+for i in $(seq 1 $WSGI_INSTANCES); 
+do 
+    echo "Make wsgi instance $i";
+    bin/mkwsgiinstance -d instance$i -u $USER_PASS;
+done
+
 rm -rf ../custom-products/
 cd ..
 
