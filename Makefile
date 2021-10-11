@@ -14,11 +14,4 @@ install:
 start:
 	bash $(START)
 service:
-	sudo rm -f /usr/bin/start_zope
-	sudo chmod -x $(START)
-	sudo chmod 775 $(START)
-	sudo ln -s $(PWD)/$(START) /usr/bin/start_zope
-	sudo cp zope.service /etc/systemd/system
-	sudo systemctl daemon-reload
-	sudo systemctl enable zope
-	sudo systemctl restart zope
+	bash install_service.sh
