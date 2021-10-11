@@ -1,11 +1,11 @@
 [Unit]
-Description=Auto start for Zope i%
+Description=Auto start for Zope %i
 After=network-online.target
 Wants=network-online.target
 [Service]
 Type=simple
 Restart=always
 TimeoutStartSec=5
-ExecStart=/usr/bin/start_zope i%
+ExecStart=/usr/bin/start_zope %i
 [Install]
 WantedBy=default.target
