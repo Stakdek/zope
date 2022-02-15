@@ -12,6 +12,6 @@ clean:
 install:
 	bash $(INSTALL)
 start:
-	bash $(START)
+	bash $(START) 1
 service:
 	bash install_service.sh
